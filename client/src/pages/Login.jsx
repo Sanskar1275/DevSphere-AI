@@ -1,75 +1,104 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import API from "../services/axios";
+import { useAuth } from "../hooks/useAuth";
 
 function Login() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      const res = await API.post("/auth/login", formData);
+
+      // Save token using AuthContext
+      login(res.data.token);
+
+      alert("Login Successful!");
+
+      navigate("/dashboard");
+    } catch (err) {
+      alert(err.response?.data?.message || "Login Failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
+    <div className="min-h-screen bg-slate-950 flex justify-center items-center px-5">
+      <div className="bg-slate-900 p-8 rounded-3xl w-full max-w-md shadow-2xl">
 
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-5">
-
-      <div className="w-full max-w-md bg-slate-900 p-8 rounded-2xl border border-slate-700 shadow-2xl">
-
-        <h1 className="text-4xl font-bold text-white text-center">
-          Welcome Back 👋
+        <h1 className="text-4xl font-bold text-cyan-400 text-center mb-2">
+          Welcome Back
         </h1>
 
-        <p className="text-slate-400 text-center mt-3">
-          Continue your journey with DevSphere AI
+        <p className="text-center text-slate-400 mb-8">
+          Login to DevSphere AI
         </p>
 
-        <form className="mt-8 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
 
-          <div>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            required
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full p-4 rounded-xl bg-slate-800 text-white border border-slate-700 focus:border-cyan-400 outline-none"
+          />
 
-            <label className="text-slate-300">
-              Email
-            </label>
-
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full mt-2 p-3 rounded-xl bg-slate-800 text-white border border-slate-700 focus:outline-none focus:border-cyan-400"
-            />
-
-          </div>
-
-          <div>
-
-            <label className="text-slate-300">
-              Password
-            </label>
-
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter password"
-              className="w-full mt-2 p-3 rounded-xl bg-slate-800 text-white border border-slate-700 focus:outline-none focus:border-cyan-400"
-            />
-
-          </div>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full p-4 rounded-xl bg-slate-800 text-white border border-slate-700 focus:border-cyan-400 outline-none"
+          />
 
           <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="text-cyan-400"
+            type="submit"
+            disabled={loading}
+            className="w-full bg-cyan-500 hover:bg-cyan-600 py-4 rounded-xl text-white font-semibold"
           >
-            {showPassword ? "Hide Password" : "Show Password"}
-          </button>
-
-          <button
-            className="w-full bg-cyan-500 hover:bg-cyan-600 py-3 rounded-xl font-semibold text-white"
-          >
-            Login
+            {loading ? "Logging In..." : "Login"}
           </button>
 
         </form>
 
+        <p className="text-center mt-6 text-slate-400">
+          Don't have an account?{" "}
+          <Link
+            to="/register"
+            className="text-cyan-400 hover:underline"
+          >
+            Register
+          </Link>
+        </p>
+
       </div>
-
     </div>
-
   );
-
 }
 
 export default Login;
