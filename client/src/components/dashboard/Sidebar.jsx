@@ -6,6 +6,7 @@ import {
   FileText,
   Settings,
   LogOut,
+  ShieldCheck,
 } from "lucide-react";
 
 import { NavLink, useNavigate } from "react-router-dom";
@@ -45,6 +46,11 @@ function Sidebar() {
       name: "Resume",
       path: "/resume",
       icon: <FileText size={22} />,
+    },
+    {
+      name: "Admin",
+      path: "/admin",
+      icon: <ShieldCheck size={22} />,
     },
     {
       name: "Settings",

@@ -19,18 +19,17 @@ const courseSchema = new mongoose.Schema(
 
     level: {
       type: String,
-      enum: ["Beginner", "Intermediate", "Advanced"],
-      required: true,
+      default: "Beginner",
     },
 
     lessons: {
       type: Number,
-      required: true,
+      default: 0,
     },
 
     duration: {
       type: String,
-      required: true,
+      default: "0 Hours",
     },
 
     rating: {
@@ -43,14 +42,34 @@ const courseSchema = new mongoose.Schema(
       default: "",
     },
 
+    instructor: {
+      type: String,
+      default: "DevSphere Team",
+    },
+
     enrolledStudents: {
       type: Number,
-      default: 0,
+      default: 2540,
     },
 
     progress: {
       type: Number,
       default: 0,
+    },
+
+    requirements: {
+      type: [String],
+      default: [],
+    },
+
+    skills: {
+      type: [String],
+      default: [],
+    },
+
+    curriculum: {
+      type: [String],
+      default: [],
     },
   },
   {

@@ -17,6 +17,10 @@ function Courses() {
     const fetchCourses = async () => {
       try {
         const data = await getCourses();
+
+        console.log("Courses from API:", data);
+        console.log("Total Courses:", data.length);
+
         setCourses(data);
       } catch (error) {
         console.log(error);
@@ -33,8 +37,7 @@ function Courses() {
       .toLowerCase()
       .includes(search.toLowerCase());
 
-    const matchesCategory =
-      category === "All" || course.category === category;
+    const matchesCategory = category === "All" || course.category === category;
 
     return matchesSearch && matchesCategory;
   });
@@ -49,31 +52,18 @@ function Courses() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-10">
-
-      <h1 className="text-5xl font-bold mb-10">
-        📚 Courses
-      </h1>
+      <h1 className="text-5xl font-bold mb-10">📚 Courses</h1>
 
       <div className="flex flex-col lg:flex-row justify-between gap-6">
+        <SearchBar search={search} setSearch={setSearch} />
 
-        <SearchBar
-          search={search}
-          setSearch={setSearch}
-        />
-
-        <CategoryFilter
-          category={category}
-          setCategory={setCategory}
-        />
-
+        <CategoryFilter category={category} setCategory={setCategory} />
       </div>
 
-      <CourseGrid
-        courses={filteredCourses}
-      />
-
+      <CourseGrid courses={filteredCourses} />
     </div>
   );
 }
+
 
 export default Courses;

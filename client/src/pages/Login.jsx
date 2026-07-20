@@ -30,7 +30,7 @@ function Login() {
       const res = await API.post("/auth/login", formData);
 
       // Save token using AuthContext
-      login(res.data.token);
+      login(res.data.token, res.data.user);
 
       alert("Login Successful!");
 

@@ -6,7 +6,7 @@ function CourseGrid({ courses }) {
 
       {courses.map((course) => (
         <CourseCard
-          key={course.id}
+          key={course._id}
           course={course}
         />
       ))}
