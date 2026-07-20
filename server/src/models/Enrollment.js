@@ -46,8 +46,7 @@ const enrollmentSchema = new mongoose.Schema(
   }
 );
 
-// Prevent the same user from enrolling
-// in the same course more than once
+// Prevent duplicate enrollment
 enrollmentSchema.index(
   {
     user: 1,

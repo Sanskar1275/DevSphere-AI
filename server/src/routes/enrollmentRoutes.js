@@ -5,18 +5,19 @@ const router = express.Router();
 const {
   enrollInCourse,
   checkEnrollment,
+  completeLesson,
+  getUserEnrollments,
 } = require("../controllers/enrollmentController");
 
-// ENROLL USER IN A COURSE
-router.post(
-  "/",
-  enrollInCourse
-);
+// Enroll in course
+router.post("/", enrollInCourse);
 
-// CHECK IF USER IS ENROLLED IN A COURSE
-router.get(
-  "/check/:userId/:courseId",
-  checkEnrollment
-);
+// Check enrollment
+router.get("/check/:userId/:courseId", checkEnrollment);
+
+// Mark lesson as complete
+router.patch("/complete-lesson", completeLesson);
+
+router.get("/user/:userId", getUserEnrollments);
 
 module.exports = router;
