@@ -9,6 +9,8 @@ import ContinueLearning from "../components/dashboard/ContinueLearning";
 import RecommendedCourses from "../components/dashboard/RecommendedCourses";
 import ActivityPanel from "../components/dashboard/ActivityPanel";
 import GoalsPanel from "../components/dashboard/GoalsPanel";
+import LatestJobs from "../components/dashboard/LatestJobs";
+import AIMentorCard from "../components/dashboard/AIMentorCard";
 
 function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
@@ -59,14 +61,18 @@ function Dashboard() {
         <main className="p-8">
           <ProgressCards stats={dashboardData.stats} />
 
-          <ContinueLearning />
+          <ContinueLearning courses={dashboardData.continueLearning} />
 
-          <RecommendedCourses />
+          <RecommendedCourses courses={dashboardData.recommendedCourses} />
+
+          <LatestJobs jobs={dashboardData.latestJobs} />
+
+          <AIMentorCard />
 
           <div className="grid lg:grid-cols-2 gap-6 mt-8">
-            <ActivityPanel />
+            <ActivityPanel activities={dashboardData.recentActivity} />
 
-            <GoalsPanel />
+            <GoalsPanel stats={dashboardData.stats} />
           </div>
         </main>
       </div>

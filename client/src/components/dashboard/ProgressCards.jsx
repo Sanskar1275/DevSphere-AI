@@ -1,131 +1,102 @@
-import { Bell, UserCircle, LogOut, Settings, User } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import {
+  BookOpen,
+  CheckCircle2,
+  TrendingUp,
+  GraduationCap,
+} from "lucide-react";
 
-function Topbar({ user }) {
-
-  const [open, setOpen] = useState(false);
-
-  const { logout } = useAuth();
-
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-
-    logout();
-
-    navigate("/login");
-
-  };
+function ProgressCards({ stats }) {
+  const cards = [
+    {
+      title: "Enrolled Courses",
+      value: stats?.enrolledCourses || 0,
+      description: "Courses you are currently learning",
+      icon: <BookOpen size={26} />,
+    },
+    {
+      title: "Lessons Completed",
+      value: stats?.completedLessons || 0,
+      description: "Lessons completed across courses",
+      icon: <CheckCircle2 size={26} />,
+    },
+    {
+      title: "Average Progress",
+      value: `${stats?.averageProgress || 0}%`,
+      description: "Your overall learning progress",
+      icon: <TrendingUp size={26} />,
+    },
+    {
+      title: "Courses Completed",
+      value: stats?.completedCourses || 0,
+      description: "Courses completed successfully",
+      icon: <GraduationCap size={26} />,
+    },
+  ];
 
   return (
+    <div>
+      {/* Section Header */}
 
-    <header className="flex justify-between items-center border-b border-slate-800 bg-slate-900 px-8 py-6">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold">
+          Learning Overview
+        </h2>
 
-      <div>
-
-        <h1 className="text-3xl font-bold">
-
-          Welcome back,
-
-          <span className="text-cyan-400">
-            {" "}
-            {user?.fullName}
-          </span>
-
-          👋
-
-        </h1>
-
-        <p className="text-slate-400 mt-2">
-          Ready to build something amazing today?
+        <p className="text-slate-400 mt-1">
+          Track your learning progress and achievements.
         </p>
-
       </div>
 
-      <div className="flex items-center gap-6 relative">
+      {/* Statistics Cards */}
 
-        <Bell
-          className="cursor-pointer hover:text-cyan-400"
-          size={24}
-        />
+      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        {cards.map((card) => (
+          <div
+            key={card.title}
+            className="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-cyan-500/40 transition"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-slate-400 text-sm">
+                  {card.title}
+                </p>
 
-        <button
-          onClick={() => setOpen(!open)}
-        >
+                <p className="text-3xl font-bold text-white mt-3">
+                  {card.value}
+                </p>
+              </div>
 
-          <UserCircle
-            size={40}
-            className="text-cyan-400 cursor-pointer"
-          />
-
-        </button>
-
-        {open && (
-
-          <div className="absolute right-0 top-14 w-72 bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl p-5 z-50">
-
-            <div className="border-b border-slate-700 pb-4">
-
-              <h2 className="font-bold text-lg">
-                {user?.fullName}
-              </h2>
-
-              <p className="text-slate-400 text-sm">
-                {user?.email}
-              </p>
-
-              <p className="text-cyan-400 capitalize mt-2">
-                {user?.role}
-              </p>
-
+              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
+                {card.icon}
+              </div>
             </div>
 
-            <div className="mt-4 space-y-3">
+            <p className="text-slate-500 text-sm mt-5">
+              {card.description}
+            </p>
 
-              <button className="flex gap-3 items-center hover:text-cyan-400">
+            {/* Progress indicator only for Average Progress */}
 
-                <User size={18} />
-
-                My Profile
-
-              </button>
-
-              <button className="flex gap-3 items-center hover:text-cyan-400">
-
-                <Settings size={18} />
-
-                Settings
-
-              </button>
-
-              <button
-
-                onClick={handleLogout}
-
-                className="flex gap-3 items-center text-red-500 hover:text-red-400"
-
-              >
-
-                <LogOut size={18} />
-
-                Logout
-
-              </button>
-
-            </div>
-
+            {card.title === "Average Progress" && (
+              <div className="mt-4">
+                <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-cyan-400 rounded-full transition-all duration-500"
+                    style={{
+                      width: `${Math.min(
+                        stats?.averageProgress || 0,
+                        100
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-
-        )}
-
+        ))}
       </div>
-
-    </header>
-
+    </div>
   );
-
 }
 
-export default Topbar;
+export default ProgressCards;

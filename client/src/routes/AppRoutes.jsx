@@ -18,6 +18,12 @@ import EditCourse from "../pages/EditCourse";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 import AIMentor from "../pages/AIMentor";
+import AdminAddJob from "../pages/AdminAddJob";
+import JobDetails from "../pages/JobDetails";
+import AdminJobs from "../pages/AdminJobs";
+import EditJob from "../pages/EditJob";
+import AdminRoute from "./AdminRoute";
+import ProtectedRoute from "./ProtectedRoute";
 
 function AppRoutes() {
   return (
@@ -76,6 +82,15 @@ function AppRoutes() {
         }
       />
 
+      <Route
+        path="/jobs/:id"
+        element={
+          <ProtectedRoute>
+            <JobDetails />
+          </ProtectedRoute>
+        }
+      />
+
       {/* AI Mentor */}
 
       <Route
@@ -92,35 +107,62 @@ function AppRoutes() {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <AdminDashboard />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
 
       <Route
         path="/admin/add-course"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <Admin />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
 
       <Route
         path="/admin/courses"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <AdminCourses />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
 
       <Route
         path="/admin/courses/edit/:id"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <EditCourse />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/add-job"
+        element={
+          <ProtectedRoute>
+            <AdminAddJob />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/jobs"
+        element={
+          <ProtectedRoute>
+            <AdminJobs />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/jobs/edit/:id"
+        element={
+          <ProtectedRoute>
+            <EditJob />
           </ProtectedRoute>
         }
       />

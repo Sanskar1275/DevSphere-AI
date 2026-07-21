@@ -13,6 +13,7 @@ const aiRoutes = require("./routes/aiRoutes");
 const conversationRoutes = require("./routes/conversationRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const enrollmentRoutes = require("./routes/enrollmentRoutes");
+const jobRoutes = require("./routes/jobRoutes");
 
 const app = express();
 
@@ -29,30 +30,25 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
+app.use("/api/jobs", jobRoutes);
 
 // Database
 connectDB();
 
 // Test Routes
 app.get("/", (req, res) => {
-  res.send(
-    "🚀 DevSphere AI Backend Running..."
-  );
+  res.send("🚀 DevSphere AI Backend Running...");
 });
 
 app.get("/api/message", (req, res) => {
   res.json({
     success: true,
-    message:
-      "🚀 Welcome to DevSphere AI",
+    message: "🚀 Welcome to DevSphere AI",
   });
 });
 
-const PORT =
-  process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(
-    `🚀 Server running on http://localhost:${PORT}`
-  );
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
