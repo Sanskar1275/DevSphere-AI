@@ -8,9 +8,14 @@ const {
   createJob,
   updateJob,
   deleteJob,
-} = require(
-  "../controllers/jobController"
-);
+} = require("../controllers/jobController");
+
+const protect = require("../middlewares/authMiddleware");
+const adminOnly = require("../middlewares/adminMiddleware");
+
+// ==========================================
+// JOB READ ROUTES
+// ==========================================
 
 // Get all jobs
 router.get("/", getJobs);
@@ -18,13 +23,17 @@ router.get("/", getJobs);
 // Get single job
 router.get("/:id", getJobById);
 
-// Create new job
-router.post("/", createJob);
+// ==========================================
+// ADMIN JOB ROUTES
+// ==========================================
+
+// Create job
+router.post("/", protect, adminOnly, createJob);
 
 // Update job
-router.put("/:id", updateJob);
+router.put("/:id", protect, adminOnly, updateJob);
 
 // Delete job
-router.delete("/:id", deleteJob);
+router.delete("/:id", protect, adminOnly, deleteJob);
 
 module.exports = router;

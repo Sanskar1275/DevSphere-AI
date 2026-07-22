@@ -1,40 +1,62 @@
 import { Routes, Route } from "react-router-dom";
 
+// ==========================================
+// PUBLIC / USER PAGES
+// ==========================================
+
 import Home from "../pages/Home";
 import Courses from "../pages/Courses";
 import CourseDetails from "../pages/CourseDetails";
 import CourseLearn from "../pages/CourseLearn";
+
 import Jobs from "../pages/Jobs";
+import JobDetails from "../pages/JobDetails";
+
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+
 import Dashboard from "../pages/Dashboard";
+import AIMentor from "../pages/AIMentor";
+
 import NotFound from "../pages/NotFound";
 
+// ==========================================
+// ADMIN PAGES
+// ==========================================
+
 import AdminDashboard from "../pages/AdminDashboard";
+
 import Admin from "../pages/Admin";
 import AdminCourses from "../pages/AdminCourses";
 import EditCourse from "../pages/EditCourse";
 
-import ProtectedRoute from "../components/ProtectedRoute";
-
-import AIMentor from "../pages/AIMentor";
 import AdminAddJob from "../pages/AdminAddJob";
-import JobDetails from "../pages/JobDetails";
 import AdminJobs from "../pages/AdminJobs";
 import EditJob from "../pages/EditJob";
-import AdminRoute from "./AdminRoute";
+
+// ==========================================
+// ROUTE GUARDS
+// ==========================================
+
 import ProtectedRoute from "./ProtectedRoute";
+import AdminRoute from "./AdminRoute";
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* ======================================
+          PUBLIC ROUTES
+      ====================================== */}
 
       <Route path="/" element={<Home />} />
+
       <Route path="/login" element={<Login />} />
+
       <Route path="/register" element={<Register />} />
 
-      {/* Protected User Routes */}
+      {/* ======================================
+          PROTECTED USER ROUTES
+      ====================================== */}
 
       <Route
         path="/dashboard"
@@ -44,6 +66,10 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* ======================================
+          COURSE ROUTES
+      ====================================== */}
 
       <Route
         path="/courses"
@@ -63,7 +89,6 @@ function AppRoutes() {
         }
       />
 
-      {/* Course Learning Page */}
       <Route
         path="/courses/:id/learn"
         element={
@@ -72,6 +97,10 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* ======================================
+          JOB ROUTES
+      ====================================== */}
 
       <Route
         path="/jobs"
@@ -91,7 +120,9 @@ function AppRoutes() {
         }
       />
 
-      {/* AI Mentor */}
+      {/* ======================================
+          AI MENTOR
+      ====================================== */}
 
       <Route
         path="/mentor"
@@ -102,7 +133,9 @@ function AppRoutes() {
         }
       />
 
-      {/* Admin Routes */}
+      {/* ======================================
+          ADMIN DASHBOARD
+      ====================================== */}
 
       <Route
         path="/admin"
@@ -112,6 +145,10 @@ function AppRoutes() {
           </AdminRoute>
         }
       />
+
+      {/* ======================================
+          ADMIN COURSE ROUTES
+      ====================================== */}
 
       <Route
         path="/admin/add-course"
@@ -140,34 +177,40 @@ function AppRoutes() {
         }
       />
 
+      {/* ======================================
+          ADMIN JOB ROUTES
+      ====================================== */}
+
       <Route
         path="/admin/add-job"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <AdminAddJob />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
 
       <Route
         path="/admin/jobs"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <AdminJobs />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
 
       <Route
         path="/admin/jobs/edit/:id"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <EditJob />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
 
-      {/* 404 */}
+      {/* ======================================
+          404
+      ====================================== */}
 
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -1,15 +1,13 @@
 import { useState } from "react";
-import {
-  Copy,
-  Check,
-  RefreshCw,
-} from "lucide-react";
+
+import { Copy, Check, RefreshCw } from "lucide-react";
+
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import AIAvatar from "./AIAvatar";
 import UserAvatar from "./UserAvatar";
 import CodeBlock from "./CodeBlock";
-
-import ReactMarkdown from "react-markdown";
 
 function MessageBubble({
   message,
@@ -19,15 +17,15 @@ function MessageBubble({
 }) {
   const isUser = message.sender === "user";
 
-  const [copied, setCopied] =
-    useState(false);
+  const [copied, setCopied] = useState(false);
 
-  // Copy complete AI response
+  // =========================================
+  // COPY COMPLETE AI RESPONSE
+  // =========================================
+
   const handleCopyResponse = async () => {
     try {
-      await navigator.clipboard.writeText(
-        message.text
-      );
+      await navigator.clipboard.writeText(message.text);
 
       setCopied(true);
 
@@ -35,31 +33,33 @@ function MessageBubble({
         setCopied(false);
       }, 2000);
     } catch (error) {
-      console.error(
-        "Failed to copy response:",
-        error
-      );
+      console.error("Failed to copy response:", error);
     }
   };
 
   return (
     <div
-      className={`flex gap-3 mb-5 ${
-        isUser
-          ? "justify-end"
-          : "justify-start"
-      }`}
+      className={`flex gap-3 mb-6 ${isUser ? "justify-end" : "justify-start"}`}
     >
-      {/* AI Avatar */}
+      {/* =====================================
+          AI AVATAR
+      ===================================== */}
+
       {!isUser && <AIAvatar />}
 
-      {/* Message Container */}
+      {/* =====================================
+          MESSAGE CONTAINER
+      ===================================== */}
+
       <div
-        className={`max-w-[85%] md:max-w-[75%] ${
+        className={`max-w-[90%] md:max-w-[80%] lg:max-w-[75%] ${
           isUser ? "" : "min-w-0"
         }`}
       >
-        {/* Message Bubble */}
+        {/* ===================================
+            MESSAGE BUBBLE
+        =================================== */}
+
         <div
           className={`rounded-2xl px-4 py-3 text-[15px] overflow-hidden ${
             isUser
@@ -68,119 +68,181 @@ function MessageBubble({
           }`}
         >
           <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
             components={{
-              // Paragraph
+              // =================================
+              // PARAGRAPH
+              // =================================
+
               p({ children }) {
-                return (
-                  <p className="mb-3 last:mb-0 leading-7">
-                    {children}
-                  </p>
-                );
+                return <p className="mb-3 last:mb-0 leading-7">{children}</p>;
               },
 
-              // Heading 1
+              // =================================
+              // HEADINGS
+              // =================================
+
               h1({ children }) {
                 return (
-                  <h1 className="text-2xl font-bold mt-4 mb-3">
+                  <h1 className="text-2xl font-bold mt-5 mb-3 text-white">
                     {children}
                   </h1>
                 );
               },
 
-              // Heading 2
               h2({ children }) {
                 return (
-                  <h2 className="text-xl font-bold mt-4 mb-3">
+                  <h2 className="text-xl font-bold mt-5 mb-3 text-white">
                     {children}
                   </h2>
                 );
               },
 
-              // Heading 3
               h3({ children }) {
                 return (
-                  <h3 className="text-lg font-semibold mt-3 mb-2">
+                  <h3 className="text-lg font-semibold mt-4 mb-2 text-white">
                     {children}
                   </h3>
                 );
               },
 
-              // Unordered List
+              // =================================
+              // LISTS
+              // =================================
+
               ul({ children }) {
                 return (
-                  <ul className="list-disc ml-6 mb-3 space-y-1">
+                  <ul className="list-disc ml-6 mb-4 space-y-1.5">
                     {children}
                   </ul>
                 );
               },
 
-              // Ordered List
               ol({ children }) {
                 return (
-                  <ol className="list-decimal ml-6 mb-3 space-y-1">
+                  <ol className="list-decimal ml-6 mb-4 space-y-1.5">
                     {children}
                   </ol>
                 );
               },
 
-              // List Item
               li({ children }) {
+                return <li className="leading-7 pl-1">{children}</li>;
+              },
+
+              // =================================
+              // BOLD
+              // =================================
+
+              strong({ children }) {
                 return (
-                  <li className="leading-7">
-                    {children}
-                  </li>
+                  <strong className="font-bold text-white">{children}</strong>
                 );
               },
 
-              // Blockquote
+              // =================================
+              // BLOCKQUOTE
+              // =================================
+
               blockquote({ children }) {
                 return (
-                  <blockquote className="border-l-4 border-cyan-400 pl-4 my-3 text-slate-300 italic">
+                  <blockquote className="border-l-4 border-cyan-400 bg-slate-900/50 pl-4 pr-4 py-2 my-4 text-slate-300 rounded-r-lg">
                     {children}
                   </blockquote>
                 );
               },
 
-              // Links
+              // =================================
+              // LINKS
+              // =================================
+
               a({ href, children }) {
                 return (
                   <a
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-cyan-400 underline hover:text-cyan-300"
+                    className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
                   >
                     {children}
                   </a>
                 );
               },
 
-              // Code
-              code({
-                className,
-                children,
-                ...props
-              }) {
-                const match =
-                  /language-(\w+)/.exec(
-                    className || ""
-                  );
+              // =================================
+              // HORIZONTAL RULE
+              // =================================
 
-                // Code Block
-                if (match) {
-                  return (
-                    <CodeBlock
-                      language={match[1]}
-                    >
+              hr() {
+                return <hr className="border-slate-700 my-5" />;
+              },
+
+              // =================================
+              // TABLE
+              // =================================
+
+              table({ children }) {
+                return (
+                  <div className="overflow-x-auto my-5 rounded-xl border border-slate-700">
+                    <table className="w-full border-collapse text-sm">
                       {children}
-                    </CodeBlock>
-                  );
+                    </table>
+                  </div>
+                );
+              },
+
+              thead({ children }) {
+                return <thead className="bg-slate-900">{children}</thead>;
+              },
+
+              tbody({ children }) {
+                return (
+                  <tbody className="divide-y divide-slate-700">
+                    {children}
+                  </tbody>
+                );
+              },
+
+              tr({ children }) {
+                return (
+                  <tr className="hover:bg-slate-700/30 transition">
+                    {children}
+                  </tr>
+                );
+              },
+
+              th({ children }) {
+                return (
+                  <th className="text-left px-4 py-3 font-semibold text-cyan-300 border-r last:border-r-0 border-slate-700">
+                    {children}
+                  </th>
+                );
+              },
+
+              td({ children }) {
+                return (
+                  <td className="px-4 py-3 text-slate-300 border-r last:border-r-0 border-slate-700 align-top">
+                    {children}
+                  </td>
+                );
+              },
+
+              // =================================
+              // CODE
+              // =================================
+
+              code({ className, children, ...props }) {
+                const match = /language-([\w-]+)/.exec(className || "");
+
+                // Fenced Code Block
+                if (match) {
+                  return <CodeBlock language={match[1]}>{children}</CodeBlock>;
                 }
 
                 // Inline Code
                 return (
                   <code
-                    className="bg-slate-950 text-cyan-300 px-1.5 py-0.5 rounded text-sm"
+                    className="bg-slate-950 text-cyan-300 px-1.5 py-0.5 rounded-md text-sm font-mono"
                     {...props}
                   >
                     {children}
@@ -193,71 +255,61 @@ function MessageBubble({
           </ReactMarkdown>
         </div>
 
-        {/* AI Response Actions */}
+        {/* =====================================
+            AI RESPONSE ACTIONS
+        ===================================== */}
+
         {!isUser && (
           <div className="flex items-center gap-1 mt-2 px-1">
+            {/* Copy Complete Response */}
 
-            {/* Copy Response */}
             <button
-              onClick={
-                handleCopyResponse
-              }
+              type="button"
+              onClick={handleCopyResponse}
               className="flex items-center gap-1.5 px-2 py-1 text-xs text-slate-500 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition"
               title="Copy response"
             >
               {copied ? (
                 <>
-                  <Check
-                    size={14}
-                    className="text-green-400"
-                  />
+                  <Check size={14} className="text-green-400" />
 
-                  <span className="text-green-400">
-                    Copied
-                  </span>
+                  <span className="text-green-400">Copied</span>
                 </>
               ) : (
                 <>
                   <Copy size={14} />
 
-                  <span>
-                    Copy response
-                  </span>
+                  <span>Copy response</span>
                 </>
               )}
             </button>
 
-            {/* Regenerate Response */}
-            {isLatestAIMessage &&
-              onRegenerate && (
-                <button
-                  onClick={
-                    onRegenerate
-                  }
-                  disabled={isLoading}
-                  className="flex items-center gap-1.5 px-2 py-1 text-xs text-slate-500 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Regenerate response"
-                >
-                  <RefreshCw
-                    size={14}
-                    className={
-                      isLoading
-                        ? "animate-spin"
-                        : ""
-                    }
-                  />
+            {/* Regenerate */}
 
-                  <span>
-                    Regenerate
-                  </span>
-                </button>
-              )}
+            {isLatestAIMessage && onRegenerate && (
+              <button
+                type="button"
+                onClick={onRegenerate}
+                disabled={isLoading}
+                className="flex items-center gap-1.5 px-2 py-1 text-xs text-slate-500 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Regenerate response"
+              >
+                <RefreshCw
+                  size={14}
+                  className={isLoading ? "animate-spin" : ""}
+                />
 
+                <span>Regenerate</span>
+              </button>
+            )}
           </div>
         )}
       </div>
 
-      {/* User Avatar */}
+      {/* =====================================
+          USER AVATAR
+      ===================================== */}
+
       {isUser && <UserAvatar />}
     </div>
   );
