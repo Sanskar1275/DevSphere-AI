@@ -7,16 +7,10 @@ const {
   regenerateAIResponse,
 } = require("../controllers/aiController");
 
-// NORMAL AI CHAT
-router.post(
-  "/chat",
-  chatWithAI
-);
+const protect = require("../middlewares/authMiddleware");
 
-// REGENERATE LATEST AI RESPONSE
-router.post(
-  "/regenerate",
-  regenerateAIResponse
-);
+router.post("/chat", protect, chatWithAI);
+
+router.post("/regenerate", protect, regenerateAIResponse);
 
 module.exports = router;
