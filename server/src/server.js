@@ -5,6 +5,10 @@ const cors = require("cors");
 
 const connectDB = require("./config/db");
 
+// ==========================================
+// ROUTES
+// ==========================================
+
 const authRoutes = require("./routes/authRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const courseRoutes = require("./routes/courseRoutes");
@@ -14,14 +18,23 @@ const conversationRoutes = require("./routes/conversationRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const enrollmentRoutes = require("./routes/enrollmentRoutes");
 const jobRoutes = require("./routes/jobRoutes");
+const applicationRoutes = require("./routes/applicationRoutes");
+const resumeRoutes = require("./routes/resumeRoutes");
 
 const app = express();
 
-// Middleware
+// ==========================================
+// MIDDLEWARE
+// ==========================================
+
 app.use(cors());
+
 app.use(express.json());
 
-// Routes
+// ==========================================
+// API ROUTES
+// ==========================================
+
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/courses", courseRoutes);
@@ -31,11 +44,19 @@ app.use("/api/conversations", conversationRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api/applications", applicationRoutes);
+app.use("/api/resume", resumeRoutes);
 
-// Database
+// ==========================================
+// DATABASE
+// ==========================================
+
 connectDB();
 
-// Test Routes
+// ==========================================
+// TEST ROUTES
+// ==========================================
+
 app.get("/", (req, res) => {
   res.send("🚀 DevSphere AI Backend Running...");
 });
@@ -46,6 +67,10 @@ app.get("/api/message", (req, res) => {
     message: "🚀 Welcome to DevSphere AI",
   });
 });
+
+// ==========================================
+// SERVER
+// ==========================================
 
 const PORT = process.env.PORT || 5000;
 

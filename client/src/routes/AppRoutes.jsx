@@ -5,12 +5,14 @@ import { Routes, Route } from "react-router-dom";
 // ==========================================
 
 import Home from "../pages/Home";
+
 import Courses from "../pages/Courses";
 import CourseDetails from "../pages/CourseDetails";
 import CourseLearn from "../pages/CourseLearn";
 
 import Jobs from "../pages/Jobs";
 import JobDetails from "../pages/JobDetails";
+import MyApplications from "../pages/MyApplications";
 
 import Login from "../pages/Login";
 import Register from "../pages/Register";
@@ -19,6 +21,8 @@ import Dashboard from "../pages/Dashboard";
 import AIMentor from "../pages/AIMentor";
 
 import NotFound from "../pages/NotFound";
+
+import Resume from "../pages/Resume";
 
 // ==========================================
 // ADMIN PAGES
@@ -33,6 +37,8 @@ import EditCourse from "../pages/EditCourse";
 import AdminAddJob from "../pages/AdminAddJob";
 import AdminJobs from "../pages/AdminJobs";
 import EditJob from "../pages/EditJob";
+import AdminApplications from "../pages/AdminApplications";
+import AdminApplicationDetails from "../pages/AdminApplicationDetails";
 
 // ==========================================
 // ROUTE GUARDS
@@ -55,7 +61,7 @@ function AppRoutes() {
       <Route path="/register" element={<Register />} />
 
       {/* ======================================
-          PROTECTED USER ROUTES
+          DASHBOARD
       ====================================== */}
 
       <Route
@@ -120,6 +126,15 @@ function AppRoutes() {
         }
       />
 
+      <Route
+        path="/applications"
+        element={
+          <ProtectedRoute>
+            <MyApplications />
+          </ProtectedRoute>
+        }
+      />
+
       {/* ======================================
           AI MENTOR
       ====================================== */}
@@ -129,6 +144,19 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AIMentor />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ======================================
+          RESUME
+      ====================================== */}
+
+      <Route
+        path="/resume"
+        element={
+          <ProtectedRoute>
+            <Resume />
           </ProtectedRoute>
         }
       />
@@ -204,6 +232,24 @@ function AppRoutes() {
         element={
           <AdminRoute>
             <EditJob />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/applications"
+        element={
+          <AdminRoute>
+            <AdminApplications />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/applications/:id"
+        element={
+          <AdminRoute>
+            <AdminApplicationDetails />
           </AdminRoute>
         }
       />

@@ -54,6 +54,11 @@ function Sidebar() {
       path: "/jobs",
       icon: Briefcase,
     },
+    {
+      name: "Resume",
+      path: "/resume",
+      icon: FileText,
+    },
   ];
 
   // =========================================
@@ -61,10 +66,6 @@ function Sidebar() {
   // =========================================
 
   const futureMenuItems = [
-    {
-      name: "Resume",
-      icon: FileText,
-    },
     {
       name: "Settings",
       icon: Settings,
