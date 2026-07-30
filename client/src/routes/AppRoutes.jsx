@@ -23,6 +23,7 @@ import AIMentor from "../pages/AIMentor";
 import NotFound from "../pages/NotFound";
 
 import Resume from "../pages/Resume";
+import ResumePreview from "../pages/ResumePreview";
 
 // ==========================================
 // ADMIN PAGES
@@ -39,6 +40,7 @@ import AdminJobs from "../pages/AdminJobs";
 import EditJob from "../pages/EditJob";
 import AdminApplications from "../pages/AdminApplications";
 import AdminApplicationDetails from "../pages/AdminApplicationDetails";
+import ResumeAnalysis from "../pages/ResumeAnalysis";
 
 // ==========================================
 // ROUTE GUARDS
@@ -157,6 +159,24 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Resume />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/resume/preview"
+        element={
+          <ProtectedRoute>
+            <ResumePreview />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/resume/analysis"
+        element={
+          <ProtectedRoute>
+            <ResumeAnalysis />
           </ProtectedRoute>
         }
       />

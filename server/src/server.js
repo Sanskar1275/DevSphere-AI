@@ -20,6 +20,7 @@ const enrollmentRoutes = require("./routes/enrollmentRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
+const resumeAnalysisRoutes = require("./routes/resumeAnalysisRoutes");
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/resume", resumeRoutes);
+app.use("/api/resume-analysis", resumeAnalysisRoutes);
 
 // ==========================================
 // DATABASE
