@@ -8,15 +8,14 @@ import {
   LogOut,
   ShieldCheck,
   Sparkles,
+  Target,
 } from "lucide-react";
 
 import { NavLink, useNavigate } from "react-router-dom";
-
 import { useAuth } from "../../hooks/useAuth";
 
 function Sidebar() {
   const { user, logout } = useAuth();
-
   const navigate = useNavigate();
 
   // =========================================
@@ -25,7 +24,6 @@ function Sidebar() {
 
   const handleLogout = () => {
     logout();
-
     navigate("/login");
   };
 
@@ -55,6 +53,11 @@ function Sidebar() {
       icon: Briefcase,
     },
     {
+      name: "Recommended Jobs",
+      path: "/jobs/recommended",
+      icon: Target,
+    },
+    {
       name: "Resume",
       path: "/resume",
       icon: FileText,
@@ -74,9 +77,7 @@ function Sidebar() {
 
   return (
     <aside className="w-72 min-h-screen bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
-      {/* =========================================
-          LOGO
-      ========================================= */}
+      {/* LOGO */}
 
       <div className="p-6 border-b border-slate-800">
         <div className="flex items-center gap-3">
@@ -95,9 +96,7 @@ function Sidebar() {
         </div>
       </div>
 
-      {/* =========================================
-          NAVIGATION
-      ========================================= */}
+      {/* NAVIGATION */}
 
       <nav className="flex-1 p-5 overflow-y-auto">
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-3">
@@ -112,6 +111,7 @@ function Sidebar() {
               <NavLink
                 key={item.name}
                 to={item.path}
+                end={item.path === "/jobs"}
                 className={({ isActive }) =>
                   `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
                     isActive
@@ -128,9 +128,7 @@ function Sidebar() {
           })}
         </div>
 
-        {/* =========================================
-            TOOLS
-        ========================================= */}
+        {/* TOOLS */}
 
         <div className="mt-8">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-3">
@@ -163,9 +161,7 @@ function Sidebar() {
           </div>
         </div>
 
-        {/* =========================================
-            ADMIN
-        ========================================= */}
+        {/* ADMIN */}
 
         {user?.role === "admin" && (
           <div className="mt-8">
@@ -191,9 +187,7 @@ function Sidebar() {
         )}
       </nav>
 
-      {/* =========================================
-          USER + LOGOUT
-      ========================================= */}
+      {/* USER + LOGOUT */}
 
       <div className="p-5 border-t border-slate-800">
         {user && (
@@ -209,6 +203,7 @@ function Sidebar() {
         )}
 
         <button
+          type="button"
           onClick={handleLogout}
           className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all"
         >

@@ -24,6 +24,10 @@ import NotFound from "../pages/NotFound";
 
 import Resume from "../pages/Resume";
 import ResumePreview from "../pages/ResumePreview";
+import RecommendedJobs from "../pages/RecommendedJobs";
+
+import InterviewSetup from "../pages/InterviewSetup";
+import InterviewSession from "../pages/InterviewSession";
 
 // ==========================================
 // ADMIN PAGES
@@ -133,6 +137,33 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <MyApplications />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/jobs/recommended"
+        element={
+          <ProtectedRoute>
+            <RecommendedJobs />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/interview/setup/:jobId"
+        element={
+          <ProtectedRoute>
+            <InterviewSetup />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/interview/:id"
+        element={
+          <ProtectedRoute>
+            <InterviewSession />
           </ProtectedRoute>
         }
       />

@@ -21,6 +21,9 @@ const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
 const resumeAnalysisRoutes = require("./routes/resumeAnalysisRoutes");
+const jobMatchRoutes = require("./routes/jobMatchRoutes");
+const jobRecommendationRoutes = require("./routes/jobRecommendationRoutes");
+const interviewRoutes = require("./routes/interviewRoutes");
 
 const app = express();
 
@@ -48,6 +51,9 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/resume", resumeRoutes);
 app.use("/api/resume-analysis", resumeAnalysisRoutes);
+app.use("/api/job-match", jobMatchRoutes);
+app.use("/api/job-recommendations", jobRecommendationRoutes);
+app.use("/api/interviews", interviewRoutes);
 
 // ==========================================
 // DATABASE
