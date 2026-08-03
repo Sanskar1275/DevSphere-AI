@@ -28,6 +28,7 @@ import RecommendedJobs from "../pages/RecommendedJobs";
 
 import InterviewSetup from "../pages/InterviewSetup";
 import InterviewSession from "../pages/InterviewSession";
+import InterviewResult from "../pages/InterviewResult";
 
 // ==========================================
 // ADMIN PAGES
@@ -164,6 +165,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <InterviewSession />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/interview/result/:id"
+        element={
+          <ProtectedRoute>
+            <InterviewResult />
           </ProtectedRoute>
         }
       />

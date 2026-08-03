@@ -1,13 +1,33 @@
 import API from "./axios";
 
-// Start Interview
+// ==========================================
+// START INTERVIEW
+// ==========================================
+
 export const startInterview = async (jobId) => {
-  const res = await API.post(`/interviews/start/${jobId}`);
-  return res.data;
+  const response = await API.post(`/interviews/start/${jobId}`);
+
+  return response.data;
 };
 
-// Get Interview
+// ==========================================
+// GET INTERVIEW
+// ==========================================
+
 export const getInterview = async (interviewId) => {
-  const res = await API.get(`/interviews/${interviewId}`);
-  return res.data;
+  const response = await API.get(`/interviews/${interviewId}`);
+
+  return response.data;
+};
+
+// ==========================================
+// SUBMIT INTERVIEW
+// ==========================================
+
+export const submitInterview = async (interviewId, answers) => {
+  const response = await API.post(`/interviews/submit/${interviewId}`, {
+    answers,
+  });
+
+  return response.data;
 };

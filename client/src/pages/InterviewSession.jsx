@@ -13,7 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { getInterview } from "../services/interviewService";
+import { getInterview, submitInterview } from "../services/interviewService";
 
 const tips = [
   "Answer with real examples whenever possible.",
@@ -36,7 +36,7 @@ const InterviewSession = () => {
 
   useEffect(() => {
     fetchInterview();
-  }, []);
+  }, [id]);
 
   const fetchInterview = async () => {
     try {
@@ -56,6 +56,18 @@ const InterviewSession = () => {
     const updated = [...answers];
     updated[currentQuestion] = value;
     setAnswers(updated);
+  };
+
+  const handleSubmitInterview = async () => {
+    try {
+      const res = await submitInterview(id, answers);
+
+      navigate(`/interview/result/${res.interview._id}`);
+    } catch (error) {
+      console.error(error);
+
+      alert(error.response?.data?.message || "Failed to submit interview.");
+    }
   };
 
   if (loading) {
@@ -296,11 +308,7 @@ const InterviewSession = () => {
             </button>
           ) : (
             <button
-              onClick={() =>
-                alert(
-                  "Interview submission will be implemented in the next step.",
-                )
-              }
+              onClick={handleSubmitInterview}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold hover:scale-105 transition-all duration-300"
             >
               <Trophy size={20} />

@@ -31,7 +31,9 @@ const questionSchema = new mongoose.Schema(
       trim: true,
     },
   },
-  { _id: false },
+  {
+    _id: false,
+  },
 );
 
 // ==========================================
@@ -40,27 +42,39 @@ const questionSchema = new mongoose.Schema(
 
 const interviewSchema = new mongoose.Schema(
   {
-    // Student
+    // ======================================
+    // USER
+    // ======================================
+
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
-    // Job
+    // ======================================
+    // JOB
+    // ======================================
+
     job: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Job",
       required: true,
     },
 
-    // Interview Questions
+    // ======================================
+    // QUESTIONS
+    // ======================================
+
     questions: {
       type: [questionSchema],
       default: [],
     },
 
-    // Overall Scores
+    // ======================================
+    // AI SCORES
+    // ======================================
+
     technicalScore: {
       type: Number,
       default: 0,
@@ -89,7 +103,10 @@ const interviewSchema = new mongoose.Schema(
       max: 100,
     },
 
-    // AI Feedback
+    // ======================================
+    // AI FEEDBACK
+    // ======================================
+
     strengths: {
       type: [String],
       default: [],
@@ -111,7 +128,10 @@ const interviewSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // Status
+    // ======================================
+    // STATUS
+    // ======================================
+
     status: {
       type: String,
       enum: ["Not Started", "In Progress", "Completed"],
@@ -126,6 +146,31 @@ const interviewSchema = new mongoose.Schema(
     completedAt: {
       type: Date,
       default: null,
+    },
+
+    // ======================================
+    // FUTURE FEATURES
+    // ======================================
+
+    duration: {
+      type: Number,
+      default: 0,
+    },
+
+    aiModel: {
+      type: String,
+      default: "DevSphere AI",
+    },
+
+    reportGenerated: {
+      type: Boolean,
+      default: false,
+    },
+
+    reportUrl: {
+      type: String,
+      default: "",
+      trim: true,
     },
   },
   {

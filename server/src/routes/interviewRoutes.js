@@ -5,22 +5,39 @@ const router = express.Router();
 const {
   startInterview,
   getInterview,
+  submitInterview,
 } = require("../controllers/interviewController");
 
 const authMiddleware = require("../middlewares/authMiddleware");
 
 // ==========================================
 // START INTERVIEW
-// POST /api/interviews/start/:jobId
 // ==========================================
 
-router.post("/start/:jobId", authMiddleware, startInterview);
+router.post(
+  "/start/:jobId",
+  authMiddleware,
+  startInterview
+);
 
 // ==========================================
 // GET INTERVIEW
-// GET /api/interviews/:id
 // ==========================================
 
-router.get("/:id", authMiddleware, getInterview);
+router.get(
+  "/:id",
+  authMiddleware,
+  getInterview
+);
+
+// ==========================================
+// SUBMIT INTERVIEW
+// ==========================================
+
+router.post(
+  "/submit/:id",
+  authMiddleware,
+  submitInterview
+);
 
 module.exports = router;
