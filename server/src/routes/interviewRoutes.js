@@ -6,6 +6,7 @@ const {
   startInterview,
   getInterview,
   submitInterview,
+  getInterviewHistory,
 } = require("../controllers/interviewController");
 
 const authMiddleware = require("../middlewares/authMiddleware");
@@ -14,30 +15,29 @@ const authMiddleware = require("../middlewares/authMiddleware");
 // START INTERVIEW
 // ==========================================
 
-router.post(
-  "/start/:jobId",
-  authMiddleware,
-  startInterview
-);
+router.post("/start/:jobId", authMiddleware, startInterview);
 
 // ==========================================
 // GET INTERVIEW
 // ==========================================
 
-router.get(
-  "/:id",
-  authMiddleware,
-  getInterview
-);
+router.get("/:id", authMiddleware, getInterview);
 
 // ==========================================
 // SUBMIT INTERVIEW
 // ==========================================
 
-router.post(
-  "/submit/:id",
+router.post("/submit/:id", authMiddleware, submitInterview);
+
+// ==========================================
+// INTERVIEW HISTORY
+// ==========================================
+
+router.get(
+  "/history",
   authMiddleware,
-  submitInterview
+  getInterviewHistory
 );
+
 
 module.exports = router;

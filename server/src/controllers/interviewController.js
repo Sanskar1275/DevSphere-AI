@@ -366,8 +366,36 @@ const submitInterview = async (req, res) => {
   }
 };
 
+// ==========================================
+// GET INTERVIEW HISTORY
+// GET /api/interviews/history
+// ==========================================
+
+const getInterviewHistory = async (req, res) => {
+  try {
+    const interviews = await Interview.find({
+      user: req.user.id,
+    })
+      .populate("job", "title company")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      interviews,
+    });
+  } catch (error) {
+    console.error("Interview History Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch interview history.",
+    });
+  }
+};
+
 module.exports = {
   startInterview,
   getInterview,
   submitInterview,
+  getInterviewHistory,
 };

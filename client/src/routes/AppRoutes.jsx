@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 // ==========================================
 // PUBLIC / USER PAGES
@@ -29,6 +29,7 @@ import RecommendedJobs from "../pages/RecommendedJobs";
 import InterviewSetup from "../pages/InterviewSetup";
 import InterviewSession from "../pages/InterviewSession";
 import InterviewResult from "../pages/InterviewResult";
+import InterviewHistory from "../pages/InterviewHistory";
 
 // ==========================================
 // ADMIN PAGES
@@ -152,6 +153,15 @@ function AppRoutes() {
       />
 
       <Route
+        path="/interview"
+        element={
+          <ProtectedRoute>
+            <Navigate to="/interviews/history" replace />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/interview/setup/:jobId"
         element={
           <ProtectedRoute>
@@ -174,6 +184,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <InterviewResult />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/interviews/history"
+        element={
+          <ProtectedRoute>
+            <InterviewHistory />
           </ProtectedRoute>
         }
       />

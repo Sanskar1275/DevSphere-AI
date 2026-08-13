@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Sparkles,
   Target,
+  MessageSquare,
 } from "lucide-react";
 
 import { NavLink, useNavigate } from "react-router-dom";
@@ -62,6 +63,11 @@ function Sidebar() {
       path: "/resume",
       icon: FileText,
     },
+    {
+      name: "Interview",
+      path: "/interview",
+      icon: MessageSquare,
+    },
   ];
 
   // =========================================
@@ -91,7 +97,9 @@ function Sidebar() {
               <span className="text-cyan-400"> AI</span>
             </h1>
 
-            <p className="text-xs text-slate-500 mt-0.5">Developer Platform</p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Developer Platform
+            </p>
           </div>
         </div>
       </div>
@@ -111,7 +119,10 @@ function Sidebar() {
               <NavLink
                 key={item.name}
                 to={item.path}
-                end={item.path === "/jobs"}
+                end={
+                  item.path === "/jobs" ||
+                  item.path === "/interview"
+                }
                 className={({ isActive }) =>
                   `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
                     isActive

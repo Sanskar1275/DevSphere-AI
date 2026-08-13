@@ -31,3 +31,13 @@ export const submitInterview = async (interviewId, answers) => {
 
   return response.data;
 };
+
+// ==========================================
+// GET INTERVIEW HISTORY
+// ==========================================
+
+export const getInterviewHistory = async () => {
+  const response = await API.get("/interviews/history");
+
+  return response.data;
+};
