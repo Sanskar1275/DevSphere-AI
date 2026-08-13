@@ -31,6 +31,8 @@ import InterviewSession from "../pages/InterviewSession";
 import InterviewResult from "../pages/InterviewResult";
 import InterviewHistory from "../pages/InterviewHistory";
 
+import Settings from "../pages/Settings";
+
 // ==========================================
 // ADMIN PAGES
 // ==========================================
@@ -47,6 +49,8 @@ import EditJob from "../pages/EditJob";
 import AdminApplications from "../pages/AdminApplications";
 import AdminApplicationDetails from "../pages/AdminApplicationDetails";
 import ResumeAnalysis from "../pages/ResumeAnalysis";
+import AdminUsers from "../pages/AdminUsers";
+import AdminAnalytics from "../pages/AdminAnalytics";
 
 // ==========================================
 // ROUTE GUARDS
@@ -254,6 +258,24 @@ function AppRoutes() {
         }
       />
 
+      <Route
+        path="/admin/analytics"
+        element={
+          <AdminRoute>
+            <AdminAnalytics />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/users"
+        element={
+          <AdminRoute>
+            <AdminUsers />
+          </AdminRoute>
+        }
+      />
+
       {/* ======================================
           ADMIN COURSE ROUTES
       ====================================== */}
@@ -331,6 +353,19 @@ function AppRoutes() {
           <AdminRoute>
             <AdminApplicationDetails />
           </AdminRoute>
+        }
+      />
+
+      {/* ======================================
+          Settings 
+      ====================================== */}
+
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
         }
       />
 

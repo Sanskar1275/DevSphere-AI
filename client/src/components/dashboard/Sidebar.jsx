@@ -70,13 +70,10 @@ function Sidebar() {
     },
   ];
 
-  // =========================================
-  // FUTURE FEATURES
-  // =========================================
-
-  const futureMenuItems = [
+  const toolsMenuItems = [
     {
       name: "Settings",
+      path: "/settings",
       icon: Settings,
     },
   ];
@@ -97,9 +94,7 @@ function Sidebar() {
               <span className="text-cyan-400"> AI</span>
             </h1>
 
-            <p className="text-xs text-slate-500 mt-0.5">
-              Developer Platform
-            </p>
+            <p className="text-xs text-slate-500 mt-0.5">Developer Platform</p>
           </div>
         </div>
       </div>
@@ -119,10 +114,7 @@ function Sidebar() {
               <NavLink
                 key={item.name}
                 to={item.path}
-                end={
-                  item.path === "/jobs" ||
-                  item.path === "/interview"
-                }
+                end={item.path === "/jobs" || item.path === "/interview"}
                 className={({ isActive }) =>
                   `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
                     isActive
@@ -147,26 +139,25 @@ function Sidebar() {
           </p>
 
           <div className="space-y-2">
-            {futureMenuItems.map((item) => {
+            {toolsMenuItems.map((item) => {
               const Icon = item.icon;
 
               return (
-                <button
+                <NavLink
                   key={item.name}
-                  type="button"
-                  disabled
-                  className="w-full flex items-center justify-between gap-4 px-4 py-3 rounded-xl text-slate-600 cursor-not-allowed"
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
+                      isActive
+                        ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/10"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                    }`
+                  }
                 >
-                  <div className="flex items-center gap-4">
-                    <Icon size={21} />
+                  <Icon size={21} />
 
-                    <span className="font-medium">{item.name}</span>
-                  </div>
-
-                  <span className="text-[10px] bg-slate-800 px-2 py-1 rounded-md text-slate-500">
-                    SOON
-                  </span>
-                </button>
+                  <span className="font-medium">{item.name}</span>
+                </NavLink>
               );
             })}
           </div>

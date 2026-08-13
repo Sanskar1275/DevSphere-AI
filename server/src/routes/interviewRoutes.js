@@ -18,6 +18,13 @@ const authMiddleware = require("../middlewares/authMiddleware");
 router.post("/start/:jobId", authMiddleware, startInterview);
 
 // ==========================================
+// INTERVIEW HISTORY
+// IMPORTANT: Keep this BEFORE /:id
+// ==========================================
+
+router.get("/history", authMiddleware, getInterviewHistory);
+
+// ==========================================
 // GET INTERVIEW
 // ==========================================
 
@@ -28,16 +35,5 @@ router.get("/:id", authMiddleware, getInterview);
 // ==========================================
 
 router.post("/submit/:id", authMiddleware, submitInterview);
-
-// ==========================================
-// INTERVIEW HISTORY
-// ==========================================
-
-router.get(
-  "/history",
-  authMiddleware,
-  getInterviewHistory
-);
-
 
 module.exports = router;
