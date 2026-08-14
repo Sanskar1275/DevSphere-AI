@@ -10,6 +10,8 @@ import {
   ShieldCheck,
   Sparkles,
   ArrowRight,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 
 import API from "../services/axios";
@@ -19,26 +21,61 @@ function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  // ==========================================
+  // GOOGLE
+  // ==========================================
+
   const googleButtonRef = useRef(null);
   const googleInitializedRef = useRef(false);
+
+  // ==========================================
+  // FORM STATE
+  // ==========================================
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
 
   // ==========================================
-  // GOOGLE AUTH RESPONSE
+  // UI STATE
+  // ==========================================
+
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // ==========================================
+  // RESTORE REMEMBERED EMAIL
+  // ==========================================
+
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
+
+    if (rememberedEmail) {
+      setFormData((prev) => ({
+        ...prev,
+        email: rememberedEmail,
+      }));
+
+      setRememberMe(true);
+    }
+  }, []);
+
+  // ==========================================
+  // GOOGLE RESPONSE
   // ==========================================
 
   const handleGoogleResponse = async (response) => {
     try {
       setError("");
+      setSuccess("");
       setGoogleLoading(true);
 
       if (!response?.credential) {
@@ -53,9 +90,12 @@ function Login() {
         throw new Error("Invalid authentication response.");
       }
 
+      // Store authentication through AuthContext
       login(res.data.token, res.data.user);
 
-      navigate("/dashboard", { replace: true });
+      navigate("/dashboard", {
+        replace: true,
+      });
     } catch (err) {
       console.error("Google login error:", err);
 
@@ -70,7 +110,7 @@ function Login() {
   };
 
   // ==========================================
-  // INITIALIZE GOOGLE IDENTITY SERVICES
+  // INITIALIZE GOOGLE
   // ==========================================
 
   useEffect(() => {
@@ -88,6 +128,7 @@ function Login() {
         return;
       }
 
+      // Prevent duplicate initialization
       if (googleInitializedRef.current) {
         return;
       }
@@ -110,16 +151,13 @@ function Login() {
 
       window.google.accounts.id.initialize({
         client_id: clientId,
-
         callback: handleGoogleResponse,
 
-        // Automatic One Tap sign-in
+        // Allow Google to recognize an already
+        // authenticated Google account when possible.
         auto_select: true,
 
-        // Allow Google/browser to handle the sign-in flow
         use_fedcm_for_button: true,
-
-        // Returning Google users can be automatically selected
         button_auto_select: true,
 
         cancel_on_tap_outside: true,
@@ -143,18 +181,14 @@ function Login() {
         type: "standard",
       });
 
-      // ======================================
-      // GOOGLE ONE TAP
-      // ======================================
-
-      // This is important.
-      // It allows Google to automatically sign in
-      // returning users when Google permits it.
-      setTimeout(() => {
-        if (!cancelled && window.google?.accounts?.id) {
-          window.google.accounts.id.prompt();
-        }
-      }, 300);
+      /*
+       * Important:
+       * We intentionally DO NOT call google.accounts.id.prompt()
+       * here.
+       *
+       * This keeps the Google button flow stable and avoids
+       * unnecessary One Tap / duplicate initialization issues.
+       */
     };
 
     // ==========================================
@@ -173,13 +207,15 @@ function Login() {
       }
     } else {
       // ========================================
-      // LOAD GOOGLE IDENTITY SERVICES
+      // LOAD GOOGLE SCRIPT
       // ========================================
 
       const script = document.createElement("script");
 
       script.id = "google-identity-services";
+
       script.src = "https://accounts.google.com/gsi/client";
+
       script.async = true;
       script.defer = true;
 
@@ -207,11 +243,34 @@ function Login() {
 
   const handleChange = (e) => {
     setError("");
+    setSuccess("");
 
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
+  };
+
+  // ==========================================
+  // VALIDATE LOGIN
+  // ==========================================
+
+  const validateForm = () => {
+    const { email, password } = formData;
+
+    if (!email.trim()) {
+      return "Please enter your email address.";
+    }
+
+    if (!email.includes("@")) {
+      return "Please enter a valid email address.";
+    }
+
+    if (!password) {
+      return "Please enter your password.";
+    }
+
+    return null;
   };
 
   // ==========================================
@@ -221,26 +280,64 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setError("");
+    setSuccess("");
+
+    const validationError = validateForm();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
-      setError("");
       setLoading(true);
 
+      const email = formData.email.trim().toLowerCase();
+
       const res = await API.post("/auth/login", {
-        email: formData.email.trim(),
+        email,
         password: formData.password,
       });
 
       if (!res.data?.token || !res.data?.user) {
-        throw new Error("Invalid login response.");
+        throw new Error("Invalid login response from server.");
       }
+
+      // ======================================
+      // REMEMBER EMAIL
+      // ======================================
+
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+      }
+
+      // ======================================
+      // SAVE AUTHENTICATION
+      // ======================================
 
       login(res.data.token, res.data.user);
 
-      navigate("/dashboard", { replace: true });
+      setSuccess("Login successful. Redirecting...");
+
+      // ======================================
+      // REDIRECT
+      // ======================================
+
+      setTimeout(() => {
+        navigate("/dashboard", {
+          replace: true,
+        });
+      }, 500);
     } catch (err) {
       console.error("Login error:", err);
 
-      setError(err.response?.data?.message || "Invalid email or password.");
+      setError(
+        err.response?.data?.message ||
+          "Invalid email or password. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -252,7 +349,9 @@ function Login() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center px-4 py-10 relative overflow-hidden">
-      {/* BACKGROUND */}
+      {/* ======================================
+          BACKGROUND
+      ====================================== */}
 
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[650px] h-[650px] bg-cyan-500/10 rounded-full blur-[160px]" />
@@ -262,10 +361,14 @@ function Login() {
         <div className="absolute top-1/2 left-0 w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-[120px]" />
       </div>
 
-      {/* MAIN */}
+      {/* ======================================
+          MAIN
+      ====================================== */}
 
       <div className="relative w-full max-w-md">
-        {/* BRAND */}
+        {/* ====================================
+            BRAND
+        ==================================== */}
 
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 mb-5">
@@ -280,7 +383,9 @@ function Login() {
           <p className="text-slate-500 text-sm mt-1">Developer Platform</p>
         </div>
 
-        {/* LOGIN CARD */}
+        {/* ====================================
+            CARD
+        ==================================== */}
 
         <div className="bg-slate-900/95 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/30 backdrop-blur-xl">
           {/* HEADER */}
@@ -289,19 +394,40 @@ function Login() {
             <h2 className="text-3xl font-black text-white">Welcome Back</h2>
 
             <p className="text-slate-400 mt-2">
-              Sign in to continue your DevSphere journey
+              Sign in to continue your DevSphere AI journey
             </p>
           </div>
 
-          {/* ERROR */}
+          {/* ==================================
+              ERROR
+          ================================== */}
 
           {error && (
-            <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
-              <p className="text-sm text-red-400 text-center">{error}</p>
+            <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
+              <AlertCircle size={18} className="text-red-400 mt-0.5 shrink-0" />
+
+              <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
 
-          {/* GOOGLE LOGIN */}
+          {/* ==================================
+              SUCCESS
+          ================================== */}
+
+          {success && (
+            <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3">
+              <CheckCircle2
+                size={18}
+                className="text-emerald-400 mt-0.5 shrink-0"
+              />
+
+              <p className="text-sm text-emerald-400">{success}</p>
+            </div>
+          )}
+
+          {/* ==================================
+              GOOGLE
+          ================================== */}
 
           <div className="relative">
             {googleLoading && (
@@ -309,7 +435,7 @@ function Login() {
                 <div className="flex items-center gap-2 text-slate-300">
                   <Loader2 size={18} className="animate-spin text-cyan-400" />
 
-                  <span className="text-sm">Signing in with Google...</span>
+                  <span className="text-sm">Signing you in...</span>
                 </div>
               </div>
             )}
@@ -320,7 +446,9 @@ function Login() {
             />
           </div>
 
-          {/* DIVIDER */}
+          {/* ==================================
+              DIVIDER
+          ================================== */}
 
           <div className="flex items-center gap-4 my-7">
             <div className="h-px bg-slate-800 flex-1" />
@@ -332,7 +460,9 @@ function Login() {
             <div className="h-px bg-slate-800 flex-1" />
           </div>
 
-          {/* EMAIL LOGIN */}
+          {/* ==================================
+              LOGIN FORM
+          ================================== */}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* EMAIL */}
@@ -360,7 +490,8 @@ function Login() {
                   autoComplete="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 rounded-xl py-3.5 pl-12 pr-4 outline-none transition-all focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10"
+                  disabled={loading}
+                  className="w-full bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 rounded-xl py-3.5 pl-12 pr-4 outline-none transition-all focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 disabled:opacity-60"
                 />
               </div>
             </div>
@@ -371,18 +502,17 @@ function Login() {
               <div className="flex items-center justify-between mb-2">
                 <label
                   htmlFor="password"
-                  className="text-sm font-medium text-slate-300"
+                  className="block text-sm font-medium text-slate-300"
                 >
                   Password
                 </label>
 
-                <button
-                  type="button"
-                  disabled
-                  className="text-xs text-slate-600 cursor-not-allowed"
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:underline transition-colors"
                 >
-                  Forgot password?
-                </button>
+                  Forgot Password?
+                </Link>
               </div>
 
               <div className="relative">
@@ -400,21 +530,50 @@ function Login() {
                   autoComplete="current-password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 rounded-xl py-3.5 pl-12 pr-12 outline-none transition-all focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10"
+                  disabled={loading}
+                  className="w-full bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 rounded-xl py-3.5 pl-12 pr-12 outline-none transition-all focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 disabled:opacity-60"
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-500 hover:text-cyan-400 transition-colors"
+                  disabled={loading}
                   aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-500 hover:text-cyan-400 transition-colors disabled:opacity-50"
                 >
                   {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                 </button>
               </div>
             </div>
 
-            {/* LOGIN BUTTON */}
+            {/* ==================================
+                REMEMBER ME
+            ================================== */}
+
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  disabled={loading}
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-cyan-500/20"
+                />
+
+                <span className="text-sm text-slate-400">
+                  Remember my email
+                </span>
+              </label>
+
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                <ShieldCheck size={14} className="text-emerald-400" />
+                Secure login
+              </div>
+            </div>
+
+            {/* ==================================
+                LOGIN BUTTON
+            ================================== */}
 
             <button
               type="submit"
@@ -438,15 +597,19 @@ function Login() {
             </button>
           </form>
 
-          {/* SECURITY */}
+          {/* ==================================
+              SECURITY
+          ================================== */}
 
           <div className="flex items-center justify-center gap-2 mt-6 text-xs text-slate-500">
             <ShieldCheck size={15} className="text-emerald-400" />
 
-            <span>Your account is securely protected</span>
+            <span>Your information is securely protected</span>
           </div>
 
-          {/* REGISTER */}
+          {/* ==================================
+              REGISTER
+          ================================== */}
 
           <div className="border-t border-slate-800 mt-6 pt-6 text-center">
             <p className="text-sm text-slate-400">
@@ -455,13 +618,15 @@ function Login() {
                 to="/register"
                 className="text-cyan-400 font-semibold hover:text-cyan-300 hover:underline transition-colors"
               >
-                Create one
+                Create Account
               </Link>
             </p>
           </div>
         </div>
 
-        {/* FOOTER */}
+        {/* ====================================
+            FOOTER
+        ==================================== */}
 
         <p className="text-center text-xs text-slate-600 mt-6">
           © {new Date().getFullYear()} DevSphere AI

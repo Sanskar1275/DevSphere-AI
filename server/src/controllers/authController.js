@@ -2,6 +2,8 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
 const { OAuth2Client } = require("google-auth-library");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 const Application = require("../models/Application");
 const Interview = require("../models/Interview");
@@ -12,6 +14,19 @@ const Job = require("../models/Job");
 // ==========================================
 
 const googleClient = new OAuth2Client();
+
+// ==========================================
+// EMAIL TRANSPORTER
+// ==========================================
+
+const emailTransporter = nodemailer.createTransport({
+  service: "gmail",
+
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
 
 // ==========================================
 // REGISTER USER
@@ -342,6 +357,295 @@ const googleLogin = async (req, res) => {
 };
 
 // ==========================================
+// FORGOT PASSWORD
+// ==========================================
+
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email address is required",
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    /*
+     * Always return the same message whether the
+     * account exists or not.
+     *
+     * This prevents email/account enumeration.
+     */
+
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message:
+          "If an account exists with this email, a password reset link has been sent.",
+      });
+    }
+
+    // ======================================
+    // GOOGLE-ONLY ACCOUNT
+    // ======================================
+
+    if (!user.password) {
+      return res.status(200).json({
+        success: true,
+        message:
+          "If an account exists with this email, a password reset link has been sent.",
+      });
+    }
+
+    // ======================================
+    // GENERATE SECURE RESET TOKEN
+    // ======================================
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    // Store only the hash in MongoDB
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    user.resetPasswordToken = hashedToken;
+
+    // Token valid for 15 minutes
+    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+
+    await user.save();
+
+    // ======================================
+    // RESET URL
+    // ======================================
+
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+
+    // ======================================
+    // EMAIL
+    // ======================================
+
+    await emailTransporter.sendMail({
+      from: `"DevSphere AI" <${process.env.EMAIL_USER}>`,
+
+      to: user.email,
+
+      subject: "Reset Your DevSphere AI Password",
+
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <body style="
+          margin:0;
+          padding:0;
+          background:#020617;
+          font-family:Arial,sans-serif;
+          color:#ffffff;
+        ">
+
+          <div style="
+            max-width:600px;
+            margin:40px auto;
+            background:#0f172a;
+            border:1px solid #1e293b;
+            border-radius:20px;
+            padding:40px;
+          ">
+
+            <h1 style="
+              color:#22d3ee;
+              margin-bottom:10px;
+            ">
+              DevSphere AI
+            </h1>
+
+            <h2>
+              Reset Your Password
+            </h2>
+
+            <p style="
+              color:#94a3b8;
+              line-height:1.7;
+            ">
+              Hi ${user.fullName},
+            </p>
+
+            <p style="
+              color:#cbd5e1;
+              line-height:1.7;
+            ">
+              We received a request to reset your
+              DevSphere AI password.
+            </p>
+
+            <div style="text-align:center;margin:35px 0;">
+
+              <a
+                href="${resetUrl}"
+                style="
+                  display:inline-block;
+                  background:#06b6d4;
+                  color:#ffffff;
+                  text-decoration:none;
+                  padding:14px 28px;
+                  border-radius:10px;
+                  font-weight:bold;
+                "
+              >
+                Reset Password
+              </a>
+
+            </div>
+
+            <p style="
+              color:#94a3b8;
+              line-height:1.7;
+            ">
+              This link will expire in
+              <strong>15 minutes</strong>.
+            </p>
+
+            <p style="
+              color:#64748b;
+              font-size:13px;
+              line-height:1.6;
+            ">
+              If you didn't request a password reset,
+              you can safely ignore this email.
+            </p>
+
+          </div>
+
+        </body>
+        </html>
+      `,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "If an account exists with this email, a password reset link has been sent.",
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to process password reset request. Please try again.",
+    });
+  }
+};
+
+// ==========================================
+// RESET PASSWORD
+// ==========================================
+
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Password reset token is required",
+      });
+    }
+
+    if (!newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password is required",
+      });
+    }
+
+    // ======================================
+    // PASSWORD VALIDATION
+    // ======================================
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // ======================================
+    // HASH TOKEN
+    // ======================================
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    // ======================================
+    // FIND VALID USER
+    // ======================================
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+
+      resetPasswordExpires: {
+        $gt: Date.now(),
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Password reset link is invalid or has expired",
+      });
+    }
+
+    // ======================================
+    // HASH NEW PASSWORD
+    // ======================================
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+
+    // ======================================
+    // CONVERT GOOGLE USER TO LOCAL+GOOGLE
+    // ======================================
+
+    if (user.googleId) {
+      user.authProvider = "google";
+    } else {
+      user.authProvider = "local";
+    }
+
+    // ======================================
+    // INVALIDATE RESET TOKEN
+    // ======================================
+
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Password reset successfully. You can now log in with your new password.",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to reset password. Please try again.",
+    });
+  }
+};
+
+// ==========================================
 // GET PROFILE
 // ==========================================
 
@@ -596,11 +900,14 @@ const deleteAccount = async (req, res) => {
 // ==========================================
 // EXPORTS
 // ==========================================
-
 module.exports = {
   registerUser,
   loginUser,
   googleLogin,
+
+  forgotPassword,
+  resetPassword,
+
   getProfile,
   updateProfile,
   changePassword,

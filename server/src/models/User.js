@@ -47,6 +47,20 @@ const userSchema = new mongoose.Schema(
     },
 
     // ==========================================
+    // PASSWORD RESET
+    // ==========================================
+
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
+    },
+
+    // ==========================================
     // USER ROLE
     // ==========================================
 

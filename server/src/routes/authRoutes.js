@@ -10,6 +10,8 @@ const {
   registerUser,
   loginUser,
   googleLogin,
+  forgotPassword,
+  resetPassword,
   getProfile,
   updateProfile,
   changePassword,
@@ -68,3 +70,11 @@ router.put("/notifications", protect, updateNotifications);
 router.delete("/account", protect, deleteAccount);
 
 module.exports = router;
+
+// ==========================================
+// PASSWORD RESET
+// ==========================================
+
+router.post("/forgot-password", forgotPassword);
+
+router.post("/reset-password/:token", resetPassword);
