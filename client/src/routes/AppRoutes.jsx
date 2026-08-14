@@ -16,6 +16,8 @@ import MyApplications from "../pages/MyApplications";
 
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 
 import Dashboard from "../pages/Dashboard";
 import AIMentor from "../pages/AIMentor";
@@ -46,8 +48,10 @@ import EditCourse from "../pages/EditCourse";
 import AdminAddJob from "../pages/AdminAddJob";
 import AdminJobs from "../pages/AdminJobs";
 import EditJob from "../pages/EditJob";
+
 import AdminApplications from "../pages/AdminApplications";
 import AdminApplicationDetails from "../pages/AdminApplicationDetails";
+
 import ResumeAnalysis from "../pages/ResumeAnalysis";
 import AdminUsers from "../pages/AdminUsers";
 import AdminAnalytics from "../pages/AdminAnalytics";
@@ -71,6 +75,10 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
 
       <Route path="/register" element={<Register />} />
+
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
 
       {/* ======================================
           DASHBOARD
@@ -155,6 +163,10 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* ======================================
+          INTERVIEW ROUTES
+      ====================================== */}
 
       <Route
         path="/interview"
@@ -338,6 +350,10 @@ function AppRoutes() {
         }
       />
 
+      {/* ======================================
+          ADMIN APPLICATION ROUTES
+      ====================================== */}
+
       <Route
         path="/admin/applications"
         element={
@@ -357,7 +373,7 @@ function AppRoutes() {
       />
 
       {/* ======================================
-          Settings 
+          SETTINGS
       ====================================== */}
 
       <Route
