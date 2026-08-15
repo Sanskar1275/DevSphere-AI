@@ -31,7 +31,6 @@ const app = express();
 // MIDDLEWARE
 // ==========================================
 
-// Allow frontend requests
 app.use(
   cors({
     origin: true,
@@ -39,7 +38,6 @@ app.use(
   }),
 );
 
-// Parse JSON requests
 app.use(express.json());
 
 // ==========================================
@@ -69,7 +67,7 @@ app.use("/api/interviews", interviewRoutes);
 connectDB();
 
 // ==========================================
-// HEALTH / TEST ROUTES
+// HEALTH ROUTES
 // ==========================================
 
 app.get("/", (req, res) => {
@@ -98,11 +96,15 @@ app.use((req, res) => {
 });
 
 // ==========================================
-// SERVER
+// LOCAL DEVELOPMENT / VERCEL
 // ==========================================
 
-const PORT = process.env.PORT || 5000;
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 DevSphere AI server running on port ${PORT}`);
-});
+  app.listen(PORT, () => {
+    console.log(`🚀 DevSphere AI server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
