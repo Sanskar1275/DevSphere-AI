@@ -71,6 +71,93 @@ const userSchema = new mongoose.Schema(
     },
 
     // ==========================================
+    // PROFESSIONAL PROFILE
+    // ==========================================
+
+    profile: {
+      bio: {
+        type: String,
+        trim: true,
+        maxlength: 500,
+        default: "",
+      },
+
+      phone: {
+        type: String,
+        trim: true,
+        maxlength: 20,
+        default: "",
+      },
+
+      location: {
+        type: String,
+        trim: true,
+        maxlength: 100,
+        default: "",
+      },
+
+      education: {
+        institution: {
+          type: String,
+          trim: true,
+          maxlength: 150,
+          default: "",
+        },
+
+        degree: {
+          type: String,
+          trim: true,
+          maxlength: 100,
+          default: "",
+        },
+
+        fieldOfStudy: {
+          type: String,
+          trim: true,
+          maxlength: 100,
+          default: "",
+        },
+
+        graduationYear: {
+          type: Number,
+          default: null,
+        },
+      },
+
+      skills: {
+        type: [String],
+        default: [],
+      },
+
+      github: {
+        type: String,
+        trim: true,
+        maxlength: 250,
+        default: "",
+      },
+
+      linkedin: {
+        type: String,
+        trim: true,
+        maxlength: 250,
+        default: "",
+      },
+
+      portfolio: {
+        type: String,
+        trim: true,
+        maxlength: 250,
+        default: "",
+      },
+
+      avatar: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+    },
+
+    // ==========================================
     // NOTIFICATION PREFERENCES
     // ==========================================
 

@@ -1,32 +1,38 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // ==========================================
-// PUBLIC / USER PAGES
+// PUBLIC PAGES
 // ==========================================
 
 import Home from "../pages/Home";
 
 import Courses from "../pages/Courses";
-import CourseDetails from "../pages/CourseDetails";
-import CourseLearn from "../pages/CourseLearn";
 
 import Jobs from "../pages/Jobs";
 import JobDetails from "../pages/JobDetails";
-import MyApplications from "../pages/MyApplications";
 
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 
+import NotFound from "../pages/NotFound";
+
+// ==========================================
+// PROTECTED USER PAGES
+// ==========================================
+
+import CourseLearn from "../pages/CourseLearn";
+
 import Dashboard from "../pages/Dashboard";
 import AIMentor from "../pages/AIMentor";
 
-import NotFound from "../pages/NotFound";
+import MyApplications from "../pages/MyApplications";
+import RecommendedJobs from "../pages/RecommendedJobs";
 
 import Resume from "../pages/Resume";
 import ResumePreview from "../pages/ResumePreview";
-import RecommendedJobs from "../pages/RecommendedJobs";
+import ResumeAnalysis from "../pages/ResumeAnalysis";
 
 import InterviewSetup from "../pages/InterviewSetup";
 import InterviewSession from "../pages/InterviewSession";
@@ -34,6 +40,7 @@ import InterviewResult from "../pages/InterviewResult";
 import InterviewHistory from "../pages/InterviewHistory";
 
 import Settings from "../pages/Settings";
+import Profile from "../pages/Profile";
 
 // ==========================================
 // ADMIN PAGES
@@ -52,7 +59,6 @@ import EditJob from "../pages/EditJob";
 import AdminApplications from "../pages/AdminApplications";
 import AdminApplicationDetails from "../pages/AdminApplicationDetails";
 
-import ResumeAnalysis from "../pages/ResumeAnalysis";
 import AdminUsers from "../pages/AdminUsers";
 import AdminAnalytics from "../pages/AdminAnalytics";
 
@@ -66,11 +72,15 @@ import AdminRoute from "./AdminRoute";
 function AppRoutes() {
   return (
     <Routes>
-      {/* ======================================
+      {/* ==================================================
           PUBLIC ROUTES
-      ====================================== */}
+      ================================================== */}
+
+      {/* HOME */}
 
       <Route path="/" element={<Home />} />
+
+      {/* AUTHENTICATION */}
 
       <Route path="/login" element={<Login />} />
 
@@ -80,40 +90,41 @@ function AppRoutes() {
 
       <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-      {/* ======================================
-          DASHBOARD
-      ====================================== */}
+      {/* ==================================================
+          COURSES
 
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
+          IMPORTANT:
+          Courses page is PUBLIC.
+          Course details are PUBLIC.
 
-      {/* ======================================
-          COURSE ROUTES
-      ====================================== */}
+          User can browse courses without login.
+      ================================================== */}
 
-      <Route
-        path="/courses"
-        element={
-          <ProtectedRoute>
-            <Courses />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/courses" element={<Courses />} />
 
       <Route
         path="/courses/:id"
         element={
           <ProtectedRoute>
-            <CourseDetails />
+            <CourseLearn />
           </ProtectedRoute>
         }
       />
+
+      {/* ==================================================
+          START COURSE
+
+          ONLY THIS ROUTE IS PROTECTED.
+
+          User reaches this route after clicking
+          "Start Course".
+
+          Logged out:
+              → /login
+
+          Logged in:
+              → CourseLearn
+      ================================================== */}
 
       <Route
         path="/courses/:id/learn"
@@ -124,18 +135,19 @@ function AppRoutes() {
         }
       />
 
-      {/* ======================================
-          JOB ROUTES
-      ====================================== */}
+      {/* ==================================================
+          JOBS
 
-      <Route
-        path="/jobs"
-        element={
-          <ProtectedRoute>
-            <Jobs />
-          </ProtectedRoute>
-        }
-      />
+          Jobs page requires login.
+      ================================================== */}
+
+      <Route path="/jobs" element={<Jobs />} />
+
+      {/* ==================================================
+          JOB DETAILS
+
+          View Details requires login.
+      ================================================== */}
 
       <Route
         path="/jobs/:id"
@@ -146,6 +158,10 @@ function AppRoutes() {
         }
       />
 
+      {/* ==================================================
+          APPLICATIONS
+      ================================================== */}
+
       <Route
         path="/applications"
         element={
@@ -154,6 +170,10 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* ==================================================
+          RECOMMENDED JOBS
+      ================================================== */}
 
       <Route
         path="/jobs/recommended"
@@ -164,9 +184,66 @@ function AppRoutes() {
         }
       />
 
-      {/* ======================================
-          INTERVIEW ROUTES
-      ====================================== */}
+      {/* ==================================================
+          DASHBOARD
+      ================================================== */}
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ==================================================
+          AI MENTOR
+      ================================================== */}
+
+      <Route
+        path="/mentor"
+        element={
+          <ProtectedRoute>
+            <AIMentor />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ==================================================
+          RESUME
+      ================================================== */}
+
+      <Route
+        path="/resume"
+        element={
+          <ProtectedRoute>
+            <Resume />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/resume/preview"
+        element={
+          <ProtectedRoute>
+            <ResumePreview />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/resume/analysis"
+        element={
+          <ProtectedRoute>
+            <ResumeAnalysis />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ==================================================
+          INTERVIEW
+      ================================================== */}
 
       <Route
         path="/interview"
@@ -213,53 +290,35 @@ function AppRoutes() {
         }
       />
 
-      {/* ======================================
-          AI MENTOR
-      ====================================== */}
+      {/* ==================================================
+          SETTINGS
+      ================================================== */}
 
       <Route
-        path="/mentor"
+        path="/settings"
         element={
           <ProtectedRoute>
-            <AIMentor />
+            <Settings />
           </ProtectedRoute>
         }
       />
 
-      {/* ======================================
-          RESUME
-      ====================================== */}
+      {/* ==================================================
+          PROFILE
+      ================================================== */}
 
       <Route
-        path="/resume"
+        path="/profile"
         element={
           <ProtectedRoute>
-            <Resume />
+            <Profile />
           </ProtectedRoute>
         }
       />
 
-      <Route
-        path="/resume/preview"
-        element={
-          <ProtectedRoute>
-            <ResumePreview />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/resume/analysis"
-        element={
-          <ProtectedRoute>
-            <ResumeAnalysis />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ======================================
+      {/* ==================================================
           ADMIN DASHBOARD
-      ====================================== */}
+      ================================================== */}
 
       <Route
         path="/admin"
@@ -288,9 +347,9 @@ function AppRoutes() {
         }
       />
 
-      {/* ======================================
-          ADMIN COURSE ROUTES
-      ====================================== */}
+      {/* ==================================================
+          ADMIN COURSES
+      ================================================== */}
 
       <Route
         path="/admin/add-course"
@@ -319,9 +378,9 @@ function AppRoutes() {
         }
       />
 
-      {/* ======================================
-          ADMIN JOB ROUTES
-      ====================================== */}
+      {/* ==================================================
+          ADMIN JOBS
+      ================================================== */}
 
       <Route
         path="/admin/add-job"
@@ -350,9 +409,9 @@ function AppRoutes() {
         }
       />
 
-      {/* ======================================
-          ADMIN APPLICATION ROUTES
-      ====================================== */}
+      {/* ==================================================
+          ADMIN APPLICATIONS
+      ================================================== */}
 
       <Route
         path="/admin/applications"
@@ -372,22 +431,9 @@ function AppRoutes() {
         }
       />
 
-      {/* ======================================
-          SETTINGS
-      ====================================== */}
-
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <Settings />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ======================================
+      {/* ==================================================
           404
-      ====================================== */}
+      ================================================== */}
 
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -15,9 +15,7 @@ export const getJobs = async () => {
 // =========================================
 
 export const getJobById = async (id) => {
-  const res = await API.get(
-    `/jobs/${id}`
-  );
+  const res = await API.get(`/jobs/${id}`);
 
   return res.data.job;
 };
@@ -26,13 +24,8 @@ export const getJobById = async (id) => {
 // CREATE NEW JOB
 // =========================================
 
-export const createJob = async (
-  jobData
-) => {
-  const res = await API.post(
-    "/jobs",
-    jobData
-  );
+export const createJob = async (jobData) => {
+  const res = await API.post("/jobs", jobData);
 
   return res.data;
 };
@@ -41,14 +34,8 @@ export const createJob = async (
 // UPDATE JOB
 // =========================================
 
-export const updateJob = async (
-  id,
-  jobData
-) => {
-  const res = await API.put(
-    `/jobs/${id}`,
-    jobData
-  );
+export const updateJob = async (id, jobData) => {
+  const res = await API.put(`/jobs/${id}`, jobData);
 
   return res.data;
 };
@@ -58,9 +45,7 @@ export const updateJob = async (
 // =========================================
 
 export const deleteJob = async (id) => {
-  const res = await API.delete(
-    `/jobs/${id}`
-  );
+  const res = await API.delete(`/jobs/${id}`);
 
   return res.data;
 };

@@ -1,6 +1,14 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
-export const AuthContext = createContext();
+// ==========================================
+// CREATE AUTH CONTEXT
+// ==========================================
+
+export const AuthContext = createContext(null);
+
+// ==========================================
+// AUTH PROVIDER
+// ==========================================
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -12,39 +20,53 @@ export const AuthProvider = ({ children }) => {
   // ==========================================
 
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("token");
+    const restoreAuthentication = () => {
+      try {
+        const token = localStorage.getItem("token");
 
-      const storedUser = localStorage.getItem("user");
+        const storedUser = localStorage.getItem("user");
 
-      if (
-        token &&
-        storedUser &&
-        storedUser !== "undefined" &&
-        storedUser !== "null"
-      ) {
+        // --------------------------------------
+        // NO AUTHENTICATION
+        // --------------------------------------
+
+        if (
+          !token ||
+          !storedUser ||
+          storedUser === "undefined" ||
+          storedUser === "null"
+        ) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+
+          setUser(null);
+
+          return;
+        }
+
+        // --------------------------------------
+        // RESTORE USER
+        // --------------------------------------
+
         const parsedUser = JSON.parse(storedUser);
 
         setUser({
           ...parsedUser,
           token,
         });
-      } else {
+      } catch (error) {
+        console.error("Failed to restore authentication:", error);
+
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
         setUser(null);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to restore authentication:", error);
+    };
 
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
+    restoreAuthentication();
   }, []);
 
   // ==========================================
@@ -52,20 +74,34 @@ export const AuthProvider = ({ children }) => {
   // ==========================================
 
   const login = (token, userData) => {
-    if (!token || !userData) {
-      console.error("Invalid login data");
+    try {
+      if (!token) {
+        console.error("Login failed: token is missing.");
+        return false;
+      }
 
-      return;
+      if (!userData) {
+        console.error("Login failed: user data is missing.");
+        return false;
+      }
+
+      // Save authentication data
+      localStorage.setItem("token", token);
+
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      // Update React state
+      setUser({
+        ...userData,
+        token,
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Login error:", error);
+
+      return false;
     }
-
-    localStorage.setItem("token", token);
-
-    localStorage.setItem("user", JSON.stringify(userData));
-
-    setUser({
-      ...userData,
-      token,
-    });
   };
 
   // ==========================================
@@ -101,20 +137,34 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ==========================================
+  // AUTH CONTEXT VALUE
+  // ==========================================
+
+  const value = {
+    user,
+    loading,
+    login,
+    logout,
+    updateUser,
+  };
+
+  // ==========================================
   // PROVIDER
   // ==========================================
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        updateUser,
-        logout,
-        loading,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+// ==========================================
+// USE AUTH HOOK
+// ==========================================
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth must be used inside an AuthProvider.");
+  }
+
+  return context;
 };

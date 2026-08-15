@@ -7,22 +7,56 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 function JobCard({ job }) {
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  // =========================================
+  // VIEW JOB DETAILS
+  // =========================================
+
+  const handleViewDetails = () => {
+    // Still checking authentication
+    if (loading) {
+      return;
+    }
+
+    // -----------------------------------------
+    // NOT LOGGED IN
+    // -----------------------------------------
+
+    if (!user) {
+      navigate("/login", {
+        replace: false,
+        state: {
+          from: `/jobs/${job._id}`,
+        },
+      });
+
+      return;
+    }
+
+    // -----------------------------------------
+    // LOGGED IN
+    // -----------------------------------------
+
+    navigate(`/jobs/${job._id}`);
+  };
+
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-cyan-500/50 transition-all duration-300">
-
-      {/* TOP SECTION */}
+      {/* =====================================
+          TOP SECTION
+      ===================================== */}
 
       <div className="flex items-start justify-between gap-4">
-
         <div className="flex items-center gap-4">
-
           {/* COMPANY LOGO */}
 
           <div className="w-14 h-14 shrink-0 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden">
-
             {job.companyLogo ? (
               <img
                 src={job.companyLogo}
@@ -30,26 +64,19 @@ function JobCard({ job }) {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <Building2
-                size={26}
-                className="text-cyan-400"
-              />
+              <Building2 size={26} className="text-cyan-400" />
             )}
-
           </div>
 
-          <div>
+          {/* JOB TITLE */}
 
-            <h2 className="text-xl font-bold text-white">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold text-white truncate">
               {job.title}
             </h2>
 
-            <p className="text-slate-400 mt-1">
-              {job.company}
-            </p>
-
+            <p className="text-slate-400 mt-1 truncate">{job.company}</p>
           </div>
-
         </div>
 
         {/* JOB TYPE */}
@@ -57,105 +84,105 @@ function JobCard({ job }) {
         <span className="shrink-0 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-medium px-3 py-1.5 rounded-full">
           {job.jobType}
         </span>
-
       </div>
 
-      {/* DESCRIPTION */}
+      {/* =====================================
+          DESCRIPTION
+      ===================================== */}
 
       <p className="text-slate-400 mt-5 leading-6 line-clamp-2">
         {job.description}
       </p>
 
-      {/* JOB INFORMATION */}
+      {/* =====================================
+          JOB INFORMATION
+      ===================================== */}
 
       <div className="grid sm:grid-cols-2 gap-3 mt-5 text-sm text-slate-300">
-
         <div className="flex items-center gap-2">
-          <MapPin
-            size={17}
-            className="text-slate-500"
-          />
+          <MapPin size={17} className="text-slate-500 shrink-0" />
 
-          {job.location}
+          <span>{job.location}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <Briefcase
-            size={17}
-            className="text-slate-500"
-          />
+          <Briefcase size={17} className="text-slate-500 shrink-0" />
 
-          {job.workMode}
+          <span>{job.workMode}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <Clock3
-            size={17}
-            className="text-slate-500"
-          />
+          <Clock3 size={17} className="text-slate-500 shrink-0" />
 
-          {job.experience}
+          <span>{job.experience}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <IndianRupee
-            size={17}
-            className="text-slate-500"
-          />
+          <IndianRupee size={17} className="text-slate-500 shrink-0" />
 
-          {job.salary}
+          <span>{job.salary}</span>
         </div>
-
       </div>
 
-      {/* SKILLS */}
+      {/* =====================================
+          SKILLS
+      ===================================== */}
 
       {job.skills?.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-5">
-
-          {job.skills
-            .slice(0, 4)
-            .map((skill, index) => (
-              <span
-                key={index}
-                className="bg-slate-800 text-slate-300 text-xs px-3 py-1.5 rounded-lg"
-              >
-                {skill}
-              </span>
-            ))}
+          {job.skills.slice(0, 4).map((skill, index) => (
+            <span
+              key={index}
+              className="bg-slate-800 text-slate-300 text-xs px-3 py-1.5 rounded-lg"
+            >
+              {skill}
+            </span>
+          ))}
 
           {job.skills.length > 4 && (
             <span className="bg-slate-800 text-slate-400 text-xs px-3 py-1.5 rounded-lg">
               +{job.skills.length - 4}
             </span>
           )}
-
         </div>
       )}
 
-      {/* BOTTOM */}
+      {/* =====================================
+          BOTTOM
+      ===================================== */}
 
       <div className="border-t border-slate-800 mt-6 pt-5 flex items-center justify-between">
-
         <span className="text-xs text-slate-500">
           {job.createdAt
-            ? `Posted ${new Date(
-                job.createdAt
-              ).toLocaleDateString()}`
+            ? `Posted ${new Date(job.createdAt).toLocaleDateString()}`
             : "Recently posted"}
         </span>
 
-        <Link
-          to={`/jobs/${job._id}`}
-          className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-medium text-sm transition"
+        {/* ===================================
+            PROTECTED VIEW DETAILS BUTTON
+        =================================== */}
+
+        <button
+          type="button"
+          onClick={handleViewDetails}
+          disabled={loading}
+          className="
+            flex
+            items-center
+            gap-2
+            text-cyan-400
+            hover:text-cyan-300
+            font-medium
+            text-sm
+            transition
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+          "
         >
           View Details
-
           <ArrowRight size={16} />
-        </Link>
-
+        </button>
       </div>
-
     </div>
   );
 }

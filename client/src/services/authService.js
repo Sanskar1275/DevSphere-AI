@@ -11,13 +11,11 @@ export const getProfile = async () => {
 };
 
 // ==========================================
-// UPDATE PROFILE
+// UPDATE PROFESSIONAL PROFILE
 // ==========================================
 
-export const updateProfile = async (fullName) => {
-  const response = await API.put("/auth/profile", {
-    fullName,
-  });
+export const updateProfile = async (profileData) => {
+  const response = await API.put("/auth/profile", profileData);
 
   return response.data;
 };

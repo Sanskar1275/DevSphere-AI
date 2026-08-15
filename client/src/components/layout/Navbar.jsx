@@ -5,70 +5,179 @@ import { useState } from "react";
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
+  // ==========================================
+  // CLOSE MOBILE MENU
+  // ==========================================
+
+  const closeMobileMenu = () => {
+    setIsOpen(false);
+  };
+
+  // ==========================================
+  // NAVIGATION LINKS
+  // ==========================================
+
+  const navLinks = [
+    {
+      name: "Home",
+      path: "/",
+    },
+    {
+      name: "Courses",
+      path: "/courses",
+    },
+    {
+      name: "Jobs",
+      path: "/jobs",
+    },
+    {
+      name: "Login",
+      path: "/login",
+    },
+  ];
+
   return (
-    <nav className="bg-slate-950 text-white px-6 py-5">
+    <nav className="bg-slate-950 text-white px-4 sm:px-6 py-5 border-b border-slate-900">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-cyan-400">DevSphere AI</h1>
+        {/* ========================================
+            LOGO
+        ======================================== */}
 
-        {/* Desktop Menu */}
-        <ul className="hidden md:flex gap-8 text-lg">
-          <li>
-            <Link to="/" className="hover:text-cyan-400 transition">
-              Home
-            </Link>
-          </li>
+        <Link
+          to="/"
+          onClick={closeMobileMenu}
+          className="
+            text-2xl
+            sm:text-3xl
+            font-bold
+            text-cyan-400
+            hover:text-cyan-300
+            transition-colors
+            duration-200
+          "
+        >
+          DevSphere AI
+        </Link>
 
-          <li>
-            <Link to="/courses" className="hover:text-cyan-400 transition">
-              Courses
-            </Link>
-          </li>
+        {/* ========================================
+            DESKTOP NAVIGATION
+        ======================================== */}
 
-          <li>
-            <Link to="/jobs" className="hover:text-cyan-400 transition">
-              Jobs
-            </Link>
-          </li>
-
-          <li>
-            <Link to="/login" className="hover:text-cyan-400 transition">
-              Login
-            </Link>
-          </li>
+        <ul className="hidden md:flex items-center gap-8 text-lg">
+          {navLinks.map((link) => (
+            <li key={link.path}>
+              <Link
+                to={link.path}
+                className="
+                  text-white
+                  hover:text-cyan-400
+                  transition-colors
+                  duration-200
+                "
+              >
+                {link.name}
+              </Link>
+            </li>
+          ))}
         </ul>
 
-        {/* Desktop Login */}
-        <button className="hidden md:block bg-cyan-500 hover:bg-cyan-600 px-5 py-2 rounded-xl font-semibold">
-          Login
-        </button>
+        {/* ========================================
+            DESKTOP LOGIN BUTTON
+        ======================================== */}
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-cyan-400"
-          onClick={() => setIsOpen(!isOpen)}
+        <Link
+          to="/login"
+          className="
+            hidden
+            md:inline-flex
+            items-center
+            justify-center
+            bg-cyan-500
+            hover:bg-cyan-600
+            text-white
+            px-6
+            py-3
+            rounded-xl
+            font-semibold
+            transition-all
+            duration-200
+            hover:shadow-lg
+            hover:shadow-cyan-500/20
+          "
         >
-          {isOpen ? <X size={32} /> : <Menu size={32} />}
+          Login
+        </Link>
+
+        {/* ========================================
+            MOBILE MENU BUTTON
+        ======================================== */}
+
+        <button
+          type="button"
+          onClick={() => setIsOpen((previous) => !previous)}
+          className="
+            md:hidden
+            w-11
+            h-11
+            rounded-xl
+            flex
+            items-center
+            justify-center
+            text-cyan-400
+            bg-slate-900
+            border
+            border-slate-800
+            hover:bg-slate-800
+            transition-colors
+            duration-200
+          "
+          aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+        >
+          {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* ========================================
+          MOBILE MENU
+      ======================================== */}
+
       {isOpen && (
-        <div className="md:hidden mt-5 bg-slate-900/80 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-slate-700">
-          <ul className="flex flex-col gap-5 text-center text-lg">
-            <li className="hover:text-cyan-400 cursor-pointer"><Link to="/">Home</Link></li>
-
-            <li className="hover:text-cyan-400 cursor-pointer"><Link to="/features">Features</Link></li>
-
-            <li className="hover:text-cyan-400 cursor-pointer"><Link to="/courses">Courses</Link></li>
-
-            <li className="hover:text-cyan-400 cursor-pointer"><Link to="/jobs">Jobs</Link></li>
-
-            <li className="hover:text-cyan-400 cursor-pointer"><Link to="/about">About</Link></li>
+        <div
+          className="
+            md:hidden
+            mt-5
+            bg-slate-900
+            rounded-2xl
+            p-6
+            shadow-2xl
+            border
+            border-slate-800
+          "
+        >
+          <ul className="flex flex-col gap-2">
+            {navLinks.map((link) => (
+              <li key={link.path}>
+                <Link
+                  to={link.path}
+                  onClick={closeMobileMenu}
+                  className="
+                    block
+                    px-4
+                    py-3
+                    rounded-xl
+                    text-center
+                    text-slate-300
+                    hover:bg-slate-800
+                    hover:text-cyan-400
+                    transition-all
+                    duration-200
+                  "
+                >
+                  {link.name}
+                </Link>
+              </li>
+            ))}
           </ul>
-
-          <button className="mt-6 w-full bg-cyan-500 hover:bg-cyan-600 py-3 rounded-xl font-semibold">
-          <Link to="/login">Login</Link>
-          </button>
         </div>
       )}
     </nav>

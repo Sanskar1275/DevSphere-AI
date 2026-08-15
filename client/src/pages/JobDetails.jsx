@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import {
   ArrowLeft,
@@ -22,21 +23,29 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+import { useAuth } from "../hooks/useAuth";
+
 import { getJobById } from "../services/jobService";
+
 import { applyForJob, getMyApplications } from "../services/applicationService";
 
 import API from "../services/axios";
 
 function JobDetails() {
   const { id } = useParams();
+
   const navigate = useNavigate();
+
+  const { user, loading: authLoading } = useAuth();
 
   // =========================================
   // JOB STATE
   // =========================================
 
   const [job, setJob] = useState(null);
+
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState("");
 
   // =========================================
@@ -71,9 +80,14 @@ function JobDetails() {
 
   // =========================================
   // LOAD JOB
+  // ONLY AFTER AUTHENTICATION
   // =========================================
 
   useEffect(() => {
+    if (authLoading || !user) {
+      return;
+    }
+
     const loadJob = async () => {
       try {
         setLoading(true);
@@ -85,6 +99,24 @@ function JobDetails() {
       } catch (error) {
         console.error("Failed to load job:", error);
 
+        // ------------------------------------
+        // AUTH ERROR
+        // ------------------------------------
+
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+
+          navigate("/login", {
+            replace: true,
+            state: {
+              from: `/jobs/${id}`,
+            },
+          });
+
+          return;
+        }
+
         setError(
           error.response?.data?.message || "Failed to load job details.",
         );
@@ -94,13 +126,18 @@ function JobDetails() {
     };
 
     loadJob();
-  }, [id]);
+  }, [id, user, authLoading, navigate]);
 
   // =========================================
   // CHECK APPLICATION
+  // ONLY AFTER AUTHENTICATION
   // =========================================
 
   useEffect(() => {
+    if (authLoading || !user) {
+      return;
+    }
+
     const checkApplication = async () => {
       try {
         setCheckingApplication(true);
@@ -117,97 +154,67 @@ function JobDetails() {
         setAlreadyApplied(found);
       } catch (error) {
         console.error("Failed to check application:", error);
+
+        // ------------------------------------
+        // AUTH ERROR
+        // ------------------------------------
+
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+
+          navigate("/login", {
+            replace: true,
+            state: {
+              from: `/jobs/${id}`,
+            },
+          });
+        }
       } finally {
         setCheckingApplication(false);
       }
     };
 
     checkApplication();
-  }, [id]);
+  }, [id, user, authLoading, navigate]);
 
   // =========================================
-  // APPLY MODAL
+  // AUTHENTICATION LOADING
   // =========================================
 
-  const openApplyModal = () => {
-    setApplicationError("");
-    setApplicationSuccess("");
-    setShowApplyModal(true);
-  };
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2
+            size={30}
+            className="animate-spin text-cyan-400 mx-auto mb-4"
+          />
 
-  const closeApplyModal = () => {
-    if (applying) return;
-
-    setShowApplyModal(false);
-    setApplicationError("");
-  };
-
-  // =========================================
-  // APPLY
-  // =========================================
-
-  const handleApply = async () => {
-    try {
-      setApplying(true);
-      setApplicationError("");
-      setApplicationSuccess("");
-
-      const data = await applyForJob(id, coverLetter);
-
-      setApplicationSuccess(
-        data.message || "Application submitted successfully",
-      );
-
-      setAlreadyApplied(true);
-      setCoverLetter("");
-
-      setTimeout(() => {
-        setShowApplyModal(false);
-        setApplicationSuccess("");
-      }, 1800);
-    } catch (error) {
-      console.error("Application failed:", error);
-
-      const message =
-        error.response?.data?.message || "Failed to submit application.";
-
-      setApplicationError(message);
-
-      if (message.toLowerCase().includes("already applied")) {
-        setAlreadyApplied(true);
-      }
-    } finally {
-      setApplying(false);
-    }
-  };
+          <p className="text-slate-400">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   // =========================================
-  // CHECK RESUME MATCH
+  // AUTHENTICATION CHECK
   // =========================================
 
-  const handleResumeMatch = async () => {
-    try {
-      setShowMatchModal(true);
-      setMatchLoading(true);
-      setMatchError("");
-      setMatchData(null);
-
-      const response = await API.get(`/job-match/${id}`);
-
-      setMatchData(response.data.match);
-    } catch (error) {
-      console.error("Resume Match Error:", error);
-
-      setMatchError(
-        error.response?.data?.message || "Failed to analyze resume match.",
-      );
-    } finally {
-      setMatchLoading(false);
-    }
-  };
+  if (!user) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{
+          from: `/jobs/${id}`,
+        }}
+      />
+    );
+  }
 
   // =========================================
-  // LOADING
+  // LOADING JOB
   // =========================================
 
   if (loading) {
@@ -237,6 +244,7 @@ function JobDetails() {
         </p>
 
         <button
+          type="button"
           onClick={() => navigate("/jobs")}
           className="mt-6 bg-cyan-500 hover:bg-cyan-600 px-6 py-3 rounded-xl font-semibold transition"
         >
@@ -255,12 +263,131 @@ function JobDetails() {
 
   const canApply = job.isActive !== false && !deadlinePassed && !alreadyApplied;
 
+  // =========================================
+  // APPLY MODAL
+  // =========================================
+
+  const openApplyModal = () => {
+    setApplicationError("");
+    setApplicationSuccess("");
+    setShowApplyModal(true);
+  };
+
+  const closeApplyModal = () => {
+    if (applying) {
+      return;
+    }
+
+    setShowApplyModal(false);
+    setApplicationError("");
+  };
+
+  // =========================================
+  // APPLY
+  // =========================================
+
+  const handleApply = async () => {
+    try {
+      setApplying(true);
+
+      setApplicationError("");
+      setApplicationSuccess("");
+
+      const data = await applyForJob(id, coverLetter);
+
+      setApplicationSuccess(
+        data.message || "Application submitted successfully",
+      );
+
+      setAlreadyApplied(true);
+
+      setCoverLetter("");
+
+      setTimeout(() => {
+        setShowApplyModal(false);
+        setApplicationSuccess("");
+      }, 1800);
+    } catch (error) {
+      console.error("Application failed:", error);
+
+      const message =
+        error.response?.data?.message || "Failed to submit application.";
+
+      setApplicationError(message);
+
+      if (message.toLowerCase().includes("already applied")) {
+        setAlreadyApplied(true);
+      }
+
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        navigate("/login", {
+          replace: true,
+          state: {
+            from: `/jobs/${id}`,
+          },
+        });
+      }
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  // =========================================
+  // RESUME MATCH
+  // =========================================
+
+  const handleResumeMatch = async () => {
+    try {
+      setShowMatchModal(true);
+
+      setMatchLoading(true);
+      setMatchError("");
+      setMatchData(null);
+
+      const response = await API.get(`/job-match/${id}`);
+
+      setMatchData(response.data.match);
+    } catch (error) {
+      console.error("Resume Match Error:", error);
+
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        navigate("/login", {
+          replace: true,
+          state: {
+            from: `/jobs/${id}`,
+          },
+        });
+
+        return;
+      }
+
+      setMatchError(
+        error.response?.data?.message || "Failed to analyze resume match.",
+      );
+    } finally {
+      setMatchLoading(false);
+    }
+  };
+
+  // =========================================
+  // RENDER
+  // =========================================
+
   return (
     <div className="min-h-screen bg-slate-950 text-white p-6 md:p-10">
       <div className="max-w-6xl mx-auto">
-        {/* BACK */}
+        {/* =====================================
+            BACK
+        ===================================== */}
 
         <button
+          type="button"
           onClick={() => navigate("/jobs")}
           className="flex items-center gap-2 text-slate-400 hover:text-white transition mb-8"
         >
@@ -292,6 +419,7 @@ function JobDetails() {
 
                 <div className="flex items-center gap-2 text-slate-400 mt-2">
                   <Building2 size={18} />
+
                   <span>{job.company}</span>
                 </div>
               </div>
@@ -652,7 +780,11 @@ function ResumeMatchModal({
             </div>
           </div>
 
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-slate-400 hover:text-white"
+          >
             <X size={24} />
           </button>
         </div>
@@ -686,6 +818,7 @@ function ResumeMatchModal({
 
             <div className="flex flex-wrap justify-center gap-3 mt-6">
               <button
+                type="button"
                 onClick={onResume}
                 className="px-5 py-2.5 border border-slate-700 rounded-xl hover:bg-slate-800"
               >
@@ -693,6 +826,7 @@ function ResumeMatchModal({
               </button>
 
               <button
+                type="button"
                 onClick={onRetry}
                 className="px-5 py-2.5 bg-violet-500 hover:bg-violet-600 rounded-xl font-semibold flex items-center gap-2"
               >
@@ -856,6 +990,7 @@ function ScoreCircle({ score = 0 }) {
 
 function Breakdown({ label, data }) {
   const score = data?.score || 0;
+
   const max = data?.maxScore || 0;
 
   const percentage = max > 0 ? (score / max) * 100 : 0;

@@ -36,7 +36,10 @@ const registerUser = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
 
-    // Validate fields
+    // ======================================
+    // VALIDATION
+    // ======================================
+
     if (!fullName || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -44,7 +47,6 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Password validation
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
@@ -52,10 +54,16 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Normalize email
+    // ======================================
+    // NORMALIZE EMAIL
+    // ======================================
+
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Check existing user
+    // ======================================
+    // CHECK EXISTING USER
+    // ======================================
+
     const existingUser = await User.findOne({
       email: normalizedEmail,
     });
@@ -75,16 +83,26 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Hash password
+    // ======================================
+    // HASH PASSWORD
+    // ======================================
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // ======================================
+    // CREATE USER
+    // ======================================
+
     const user = await User.create({
       fullName: fullName.trim(),
       email: normalizedEmail,
       password: hashedPassword,
       authProvider: "local",
     });
+
+    // ======================================
+    // RESPONSE
+    // ======================================
 
     return res.status(201).json({
       success: true,
@@ -96,6 +114,7 @@ const registerUser = async (req, res) => {
         email: user.email,
         role: user.role,
         authProvider: user.authProvider,
+        profile: user.profile,
         notifications: user.notifications,
         createdAt: user.createdAt,
       },
@@ -118,6 +137,10 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // ======================================
+    // VALIDATION
+    // ======================================
+
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -125,10 +148,16 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Normalize email
+    // ======================================
+    // NORMALIZE EMAIL
+    // ======================================
+
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Find user
+    // ======================================
+    // FIND USER
+    // ======================================
+
     const user = await User.findOne({
       email: normalizedEmail,
     });
@@ -140,7 +169,10 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Google-only account
+    // ======================================
+    // GOOGLE-ONLY ACCOUNT
+    // ======================================
+
     if (!user.password) {
       return res.status(400).json({
         success: false,
@@ -149,7 +181,10 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Compare password
+    // ======================================
+    // COMPARE PASSWORD
+    // ======================================
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -159,8 +194,15 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Generate JWT
+    // ======================================
+    // GENERATE JWT
+    // ======================================
+
     const token = generateToken(user._id, user.role);
+
+    // ======================================
+    // RESPONSE
+    // ======================================
 
     return res.status(200).json({
       success: true,
@@ -174,6 +216,7 @@ const loginUser = async (req, res) => {
         email: user.email,
         role: user.role,
         authProvider: user.authProvider,
+        profile: user.profile,
         notifications: user.notifications,
       },
     });
@@ -196,7 +239,7 @@ const googleLogin = async (req, res) => {
     const { credential } = req.body;
 
     // ======================================
-    // VALIDATE GOOGLE CREDENTIAL
+    // VALIDATE CREDENTIAL
     // ======================================
 
     if (!credential) {
@@ -239,6 +282,7 @@ const googleLogin = async (req, res) => {
 
     const googleId = payload.sub;
     const email = payload.email?.toLowerCase().trim();
+
     const fullName =
       payload.name ||
       `${payload.given_name || ""} ${payload.family_name || ""}`.trim() ||
@@ -273,8 +317,7 @@ const googleLogin = async (req, res) => {
     });
 
     // ======================================
-    // IF GOOGLE ACCOUNT DOESN'T EXIST,
-    // CHECK EMAIL
+    // IF NOT FOUND, CHECK EMAIL
     // ======================================
 
     if (!user) {
@@ -289,15 +332,14 @@ const googleLogin = async (req, res) => {
 
     if (user) {
       // ------------------------------------
-      // LINK GOOGLE TO EXISTING ACCOUNT
+      // LINK GOOGLE ACCOUNT
       // ------------------------------------
 
       if (!user.googleId) {
         user.googleId = googleId;
+
         user.authProvider = "google";
 
-        // Keep existing name if user already
-        // customized it.
         if (!user.fullName) {
           user.fullName = fullName;
         }
@@ -322,7 +364,7 @@ const googleLogin = async (req, res) => {
     }
 
     // ======================================
-    // GENERATE DEVSPHERE JWT
+    // GENERATE JWT
     // ======================================
 
     const token = generateToken(user._id, user.role);
@@ -343,7 +385,9 @@ const googleLogin = async (req, res) => {
         email: user.email,
         role: user.role,
         authProvider: user.authProvider,
+        profile: user.profile,
         notifications: user.notifications,
+        createdAt: user.createdAt,
       },
     });
   } catch (error) {
@@ -364,6 +408,10 @@ const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
+    // ======================================
+    // VALIDATION
+    // ======================================
+
     if (!email) {
       return res.status(400).json({
         success: false,
@@ -373,16 +421,17 @@ const forgotPassword = async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
+    // ======================================
+    // FIND USER
+    // ======================================
+
     const user = await User.findOne({
       email: normalizedEmail,
     });
 
-    /*
-     * Always return the same message whether the
-     * account exists or not.
-     *
-     * This prevents email/account enumeration.
-     */
+    // ======================================
+    // PREVENT EMAIL ENUMERATION
+    // ======================================
 
     if (!user) {
       return res.status(200).json({
@@ -410,7 +459,6 @@ const forgotPassword = async (req, res) => {
 
     const resetToken = crypto.randomBytes(32).toString("hex");
 
-    // Store only the hash in MongoDB
     const hashedToken = crypto
       .createHash("sha256")
       .update(resetToken)
@@ -430,7 +478,7 @@ const forgotPassword = async (req, res) => {
     const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
     // ======================================
-    // EMAIL
+    // SEND EMAIL
     // ======================================
 
     await emailTransporter.sendMail({
@@ -442,92 +490,101 @@ const forgotPassword = async (req, res) => {
 
       html: `
         <!DOCTYPE html>
-        <html>
-        <body style="
-          margin:0;
-          padding:0;
-          background:#020617;
-          font-family:Arial,sans-serif;
-          color:#ffffff;
-        ">
 
-          <div style="
-            max-width:600px;
-            margin:40px auto;
-            background:#0f172a;
-            border:1px solid #1e293b;
-            border-radius:20px;
-            padding:40px;
+        <html>
+          <body style="
+            margin:0;
+            padding:0;
+            background:#020617;
+            font-family:Arial,sans-serif;
+            color:#ffffff;
           ">
 
-            <h1 style="
-              color:#22d3ee;
-              margin-bottom:10px;
+            <div style="
+              max-width:600px;
+              margin:40px auto;
+              background:#0f172a;
+              border:1px solid #1e293b;
+              border-radius:20px;
+              padding:40px;
             ">
-              DevSphere AI
-            </h1>
 
-            <h2>
-              Reset Your Password
-            </h2>
+              <h1 style="
+                color:#22d3ee;
+                margin-bottom:10px;
+              ">
+                DevSphere AI
+              </h1>
 
-            <p style="
-              color:#94a3b8;
-              line-height:1.7;
-            ">
-              Hi ${user.fullName},
-            </p>
+              <h2>
+                Reset Your Password
+              </h2>
 
-            <p style="
-              color:#cbd5e1;
-              line-height:1.7;
-            ">
-              We received a request to reset your
-              DevSphere AI password.
-            </p>
+              <p style="
+                color:#94a3b8;
+                line-height:1.7;
+              ">
+                Hi ${user.fullName},
+              </p>
 
-            <div style="text-align:center;margin:35px 0;">
+              <p style="
+                color:#cbd5e1;
+                line-height:1.7;
+              ">
+                We received a request to reset
+                your DevSphere AI password.
+              </p>
 
-              <a
-                href="${resetUrl}"
-                style="
-                  display:inline-block;
-                  background:#06b6d4;
-                  color:#ffffff;
-                  text-decoration:none;
-                  padding:14px 28px;
-                  border-radius:10px;
-                  font-weight:bold;
-                "
-              >
-                Reset Password
-              </a>
+              <div style="
+                text-align:center;
+                margin:35px 0;
+              ">
+
+                <a
+                  href="${resetUrl}"
+                  style="
+                    display:inline-block;
+                    background:#06b6d4;
+                    color:#ffffff;
+                    text-decoration:none;
+                    padding:14px 28px;
+                    border-radius:10px;
+                    font-weight:bold;
+                  "
+                >
+                  Reset Password
+                </a>
+
+              </div>
+
+              <p style="
+                color:#94a3b8;
+                line-height:1.7;
+              ">
+                This link will expire in
+                <strong>15 minutes</strong>.
+              </p>
+
+              <p style="
+                color:#64748b;
+                font-size:13px;
+                line-height:1.6;
+              ">
+                If you didn't request a password
+                reset, you can safely ignore this
+                email.
+              </p>
 
             </div>
 
-            <p style="
-              color:#94a3b8;
-              line-height:1.7;
-            ">
-              This link will expire in
-              <strong>15 minutes</strong>.
-            </p>
-
-            <p style="
-              color:#64748b;
-              font-size:13px;
-              line-height:1.6;
-            ">
-              If you didn't request a password reset,
-              you can safely ignore this email.
-            </p>
-
-          </div>
-
-        </body>
+          </body>
         </html>
       `,
     });
+
+    // ======================================
+    // RESPONSE
+    // ======================================
 
     return res.status(200).json({
       success: true,
@@ -553,6 +610,10 @@ const resetPassword = async (req, res) => {
     const { token } = req.params;
     const { newPassword } = req.body;
 
+    // ======================================
+    // VALIDATION
+    // ======================================
+
     if (!token) {
       return res.status(400).json({
         success: false,
@@ -567,10 +628,6 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    // ======================================
-    // PASSWORD VALIDATION
-    // ======================================
-
     if (newPassword.length < 6) {
       return res.status(400).json({
         success: false,
@@ -579,7 +636,7 @@ const resetPassword = async (req, res) => {
     }
 
     // ======================================
-    // HASH TOKEN
+    // HASH RESET TOKEN
     // ======================================
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -612,7 +669,7 @@ const resetPassword = async (req, res) => {
     user.password = hashedPassword;
 
     // ======================================
-    // CONVERT GOOGLE USER TO LOCAL+GOOGLE
+    // AUTH PROVIDER
     // ======================================
 
     if (user.googleId) {
@@ -629,6 +686,10 @@ const resetPassword = async (req, res) => {
     user.resetPasswordExpires = null;
 
     await user.save();
+
+    // ======================================
+    // RESPONSE
+    // ======================================
 
     return res.status(200).json({
       success: true,
@@ -675,12 +736,27 @@ const getProfile = async (req, res) => {
 };
 
 // ==========================================
-// UPDATE PROFILE
+// UPDATE PROFESSIONAL PROFILE
 // ==========================================
 
 const updateProfile = async (req, res) => {
   try {
-    const { fullName } = req.body;
+    const {
+      fullName,
+      bio,
+      phone,
+      location,
+      education,
+      skills,
+      github,
+      linkedin,
+      portfolio,
+      avatar,
+    } = req.body;
+
+    // ======================================
+    // VALIDATE FULL NAME
+    // ======================================
 
     if (!fullName || !fullName.trim()) {
       return res.status(400).json({
@@ -688,6 +764,17 @@ const updateProfile = async (req, res) => {
         message: "Full name is required",
       });
     }
+
+    if (fullName.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: "Full name must contain at least 2 characters",
+      });
+    }
+
+    // ======================================
+    // FIND USER
+    // ======================================
 
     const user = await User.findById(req.user.id).select("-password");
 
@@ -698,9 +785,126 @@ const updateProfile = async (req, res) => {
       });
     }
 
+    // ======================================
+    // UPDATE BASIC INFORMATION
+    // ======================================
+
     user.fullName = fullName.trim();
 
+    // ======================================
+    // CURRENT PROFILE DATA
+    // ======================================
+
+    const currentProfile = user.profile || {};
+
+    const currentEducation = currentProfile.education || {};
+
+    // ======================================
+    // CLEAN SKILLS
+    // ======================================
+
+    let cleanedSkills = currentProfile.skills || [];
+
+    if (Array.isArray(skills)) {
+      cleanedSkills = [
+        ...new Set(
+          skills
+            .filter((skill) => typeof skill === "string" && skill.trim())
+            .map((skill) => skill.trim()),
+        ),
+      ];
+    }
+
+    // ======================================
+    // EDUCATION
+    // ======================================
+
+    const updatedEducation = {
+      institution:
+        typeof education?.institution === "string"
+          ? education.institution.trim()
+          : currentEducation.institution || "",
+
+      degree:
+        typeof education?.degree === "string"
+          ? education.degree.trim()
+          : currentEducation.degree || "",
+
+      fieldOfStudy:
+        typeof education?.fieldOfStudy === "string"
+          ? education.fieldOfStudy.trim()
+          : currentEducation.fieldOfStudy || "",
+
+      graduationYear: education?.graduationYear
+        ? Number(education.graduationYear)
+        : currentEducation.graduationYear || null,
+    };
+
+    // ======================================
+    // VALIDATE GRADUATION YEAR
+    // ======================================
+
+    if (
+      updatedEducation.graduationYear !== null &&
+      (!Number.isInteger(updatedEducation.graduationYear) ||
+        updatedEducation.graduationYear < 1900 ||
+        updatedEducation.graduationYear > 2100)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid graduation year",
+      });
+    }
+
+    // ======================================
+    // UPDATE PROFESSIONAL PROFILE
+    // ======================================
+
+    user.profile = {
+      bio: typeof bio === "string" ? bio.trim() : currentProfile.bio || "",
+
+      phone:
+        typeof phone === "string" ? phone.trim() : currentProfile.phone || "",
+
+      location:
+        typeof location === "string"
+          ? location.trim()
+          : currentProfile.location || "",
+
+      education: updatedEducation,
+
+      skills: cleanedSkills,
+
+      github:
+        typeof github === "string"
+          ? github.trim()
+          : currentProfile.github || "",
+
+      linkedin:
+        typeof linkedin === "string"
+          ? linkedin.trim()
+          : currentProfile.linkedin || "",
+
+      portfolio:
+        typeof portfolio === "string"
+          ? portfolio.trim()
+          : currentProfile.portfolio || "",
+
+      avatar:
+        typeof avatar === "string"
+          ? avatar.trim()
+          : currentProfile.avatar || "",
+    };
+
+    // ======================================
+    // SAVE USER
+    // ======================================
+
     await user.save();
+
+    // ======================================
+    // RESPONSE
+    // ======================================
 
     return res.status(200).json({
       success: true,
@@ -725,6 +929,10 @@ const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
+    // ======================================
+    // VALIDATION
+    // ======================================
+
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
         success: false,
@@ -739,6 +947,10 @@ const changePassword = async (req, res) => {
       });
     }
 
+    // ======================================
+    // FIND USER
+    // ======================================
+
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -748,7 +960,10 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Google account without a password
+    // ======================================
+    // GOOGLE ACCOUNT
+    // ======================================
+
     if (!user.password) {
       return res.status(400).json({
         success: false,
@@ -757,7 +972,10 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Verify current password
+    // ======================================
+    // VERIFY CURRENT PASSWORD
+    // ======================================
+
     const isMatch = await bcrypt.compare(currentPassword, user.password);
 
     if (!isMatch) {
@@ -767,12 +985,19 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Hash new password
+    // ======================================
+    // HASH NEW PASSWORD
+    // ======================================
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     user.password = hashedPassword;
 
     await user.save();
+
+    // ======================================
+    // RESPONSE
+    // ======================================
 
     return res.status(200).json({
       success: true,
@@ -797,6 +1022,10 @@ const updateNotifications = async (req, res) => {
     const { emailNotifications, interviewNotifications, jobRecommendations } =
       req.body;
 
+    // ======================================
+    // FIND USER
+    // ======================================
+
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -805,6 +1034,10 @@ const updateNotifications = async (req, res) => {
         message: "User not found",
       });
     }
+
+    // ======================================
+    // UPDATE NOTIFICATIONS
+    // ======================================
 
     user.notifications = {
       emailNotifications:
@@ -825,9 +1058,14 @@ const updateNotifications = async (req, res) => {
 
     await user.save();
 
+    // ======================================
+    // RESPONSE
+    // ======================================
+
     return res.status(200).json({
       success: true,
       message: "Notification preferences updated successfully",
+
       notifications: user.notifications,
     });
   } catch (error) {
@@ -848,7 +1086,10 @@ const deleteAccount = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Verify user
+    // ======================================
+    // VERIFY USER
+    // ======================================
+
     const user = await User.findById(userId);
 
     if (!user) {
@@ -858,17 +1099,26 @@ const deleteAccount = async (req, res) => {
       });
     }
 
-    // Delete applications
+    // ======================================
+    // DELETE APPLICATIONS
+    // ======================================
+
     await Application.deleteMany({
       user: userId,
     });
 
-    // Delete interviews
+    // ======================================
+    // DELETE INTERVIEWS
+    // ======================================
+
     await Interview.deleteMany({
       user: userId,
     });
 
-    // Detach user from jobs
+    // ======================================
+    // DETACH USER FROM JOBS
+    // ======================================
+
     await Job.updateMany(
       {
         postedBy: userId,
@@ -880,8 +1130,15 @@ const deleteAccount = async (req, res) => {
       },
     );
 
-    // Delete user
+    // ======================================
+    // DELETE USER
+    // ======================================
+
     await User.findByIdAndDelete(userId);
+
+    // ======================================
+    // RESPONSE
+    // ======================================
 
     return res.status(200).json({
       success: true,
@@ -900,14 +1157,13 @@ const deleteAccount = async (req, res) => {
 // ==========================================
 // EXPORTS
 // ==========================================
+
 module.exports = {
   registerUser,
   loginUser,
   googleLogin,
-
   forgotPassword,
   resetPassword,
-
   getProfile,
   updateProfile,
   changePassword,
