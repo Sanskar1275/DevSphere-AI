@@ -31,8 +31,15 @@ const app = express();
 // MIDDLEWARE
 // ==========================================
 
-app.use(cors());
+// Allow frontend requests
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  }),
+);
 
+// Parse JSON requests
 app.use(express.json());
 
 // ==========================================
@@ -62,17 +69,31 @@ app.use("/api/interviews", interviewRoutes);
 connectDB();
 
 // ==========================================
-// TEST ROUTES
+// HEALTH / TEST ROUTES
 // ==========================================
 
 app.get("/", (req, res) => {
-  res.send("🚀 DevSphere AI Backend Running...");
+  res.status(200).json({
+    success: true,
+    message: "🚀 DevSphere AI Backend Running...",
+  });
 });
 
 app.get("/api/message", (req, res) => {
-  res.json({
+  res.status(200).json({
     success: true,
     message: "🚀 Welcome to DevSphere AI",
+  });
+});
+
+// ==========================================
+// 404 HANDLER
+// ==========================================
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.originalUrl}`,
   });
 });
 
@@ -82,6 +103,6 @@ app.get("/api/message", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 DevSphere AI server running on port ${PORT}`);
 });
